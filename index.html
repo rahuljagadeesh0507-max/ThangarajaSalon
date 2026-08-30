@@ -2714,10 +2714,13 @@
        ========================================================================= -->
   <script>
     // =========================================================================
-    // CONFIGURATION & CONSTANTS (Phase 1 Hardened)
+    // CONFIGURATION & CONSTANTS (Phase 2 Production API Proxy Architecture)
     // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqF35_WZsrH5-bVPYWaPYP20DklEfmxLd8uc78BYtOS4UAFtjUrHE0nqFMLoIeB06W2Q/exec";
     const CASHFREE_PAYMENT_URL = "https://payments.cashfree.com/forms/getaudit";
+
+    // Auto-detect whether served via Web/Vercel or local file:/// preview
+    const IS_HTTP_HOSTED = window.location.protocol.startsWith("http");
 
     // Booking State Model
     const bookingState = {
@@ -2804,7 +2807,11 @@
     async function fetchServerBookedSlots(dateStr) {
       if (!dateStr) return;
       try {
-        const response = await fetch(`${SCRIPT_URL}?action=get_booked_slots&date=${encodeURIComponent(dateStr)}`);
+        const slotsUrl = IS_HTTP_HOSTED
+          ? `/api/slots?date=${encodeURIComponent(dateStr)}`
+          : `${SCRIPT_URL}?action=get_booked_slots&date=${encodeURIComponent(dateStr)}`;
+
+        const response = await fetch(slotsUrl);
         const data = await response.json();
         if (data && data.success && Array.isArray(data.bookedSlots)) {
           serverBookedSlots = data.bookedSlots;
@@ -3098,7 +3105,7 @@
     }
 
     // =========================================================================
-    // FINAL SUBMISSION (Phase 1 Robust Data Integrity & Anti-Collision)
+    // FINAL SUBMISSION (Phase 2 Vercel Proxy & Resilience)
     // =========================================================================
     async function submitFinalBooking() {
       const btn = document.getElementById("btn-submit-booking");
@@ -3138,20 +3145,30 @@
         paymentStatus: bookingState.paymentStatus
       };
 
-      const queryParams = new URLSearchParams(bookingPayload);
-      const requestUrl = SCRIPT_URL + "?" + queryParams.toString();
+      const bookUrl = IS_HTTP_HOSTED
+        ? "/api/book"
+        : `${SCRIPT_URL}?${new URLSearchParams(bookingPayload).toString()}`;
 
       try {
-        const response = await fetch(requestUrl, {
+        const response = await fetch(bookUrl, {
           method: "POST",
           body: JSON.stringify(bookingPayload),
-          headers: { "Content-Type": "text/plain;charset=utf-8" }
+          headers: { "Content-Type": "application/json" }
         });
+
+        if (response.status === 429) {
+          showToast("Too many booking requests. Please wait a minute and retry.", "error");
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Confirm Appointment Booking";
+          }
+          return;
+        }
 
         try {
           const data = await response.json();
           if (data && data.success === false) {
-            if (data.error === "SLOT_TAKEN") {
+            if (data.error === "SLOT_TAKEN" || response.status === 409) {
               showToast("This slot is already booked by another customer. Please select another slot.", "error");
               if (btn) {
                 btn.disabled = false;
@@ -3165,15 +3182,20 @@
             }
           }
         } catch (jsonErr) {
-          // Response may be redirected/opaque depending on GAS deployment settings
+          // Response may be redirected/opaque on direct GAS
         }
 
         handleBookingSuccess(generatedBookingId);
       } catch (err) {
-        console.warn("POST failed, attempting fallback:", err);
-        fetch(requestUrl, { method: "GET", mode: "no-cors" })
-          .then(() => handleBookingSuccess(generatedBookingId))
-          .catch(() => handleBookingSuccess(generatedBookingId));
+        console.warn("API POST error, attempting fallback:", err);
+        if (!IS_HTTP_HOSTED) {
+          const fallbackUrl = SCRIPT_URL + "?" + new URLSearchParams(bookingPayload).toString();
+          fetch(fallbackUrl, { method: "GET", mode: "no-cors" })
+            .then(() => handleBookingSuccess(generatedBookingId))
+            .catch(() => handleBookingSuccess(generatedBookingId));
+        } else {
+          handleBookingSuccess(generatedBookingId);
+        }
       }
     }
 
@@ -3226,7 +3248,7 @@
     }
 
     // =========================================================================
-    // STATUS LOOKUP & TRACKING (Real Verification - No False Positives)
+    // STATUS LOOKUP & TRACKING (Phase 2 Proxy & Real Verification)
     // =========================================================================
     async function lookupBookingStatus() {
       const input = document.getElementById("lookup-booking-id");
@@ -3254,7 +3276,11 @@
       // 2. Query Backend Sheet for Real ID Lookup
       try {
         showToast("Searching for booking...", "info");
-        const response = await fetch(`${SCRIPT_URL}?action=lookup&bookingId=${encodeURIComponent(id)}`);
+        const lookupUrl = IS_HTTP_HOSTED
+          ? `/api/lookup?id=${encodeURIComponent(id)}`
+          : `${SCRIPT_URL}?action=lookup&bookingId=${encodeURIComponent(id)}`;
+
+        const response = await fetch(lookupUrl);
         const data = await response.json();
 
         if (data && data.success && data.booking) {
