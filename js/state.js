@@ -2,14 +2,15 @@
  * Thangaraja Salon - Booking State Management
  */
 
-import { CONFIG, SERVICES } from './config.js';
-import { getSlotAvailabilityStatus, getTreatmentDuration } from './duration.js';
+import { CONFIG, SERVICES, STYLISTS } from './config.js';
+import { getSlotAvailabilityStatus } from './duration.js';
 
 export const bookingState = {
   treatment: "Hair Cut",
   price: 130,
   durationMins: 30,
   durationLabel: "30 mins",
+  stylist: "First Available Pro",
   date: "",           // YYYY-MM-DD
   displayDate: "",    // e.g. "28 Aug 2026"
   time: "",           // e.g. "09:30 AM"
@@ -48,16 +49,31 @@ export function saveConfirmedBooking(booking) {
   try {
     const raw = localStorage.getItem(CONFIG.STORAGE_KEY_BOOKINGS);
     const stored = JSON.parse(raw || "[]");
-    stored.push(booking);
-    localStorage.setItem(CONFIG.STORAGE_KEY_BOOKINGS, JSON.stringify(stored));
+    // Remove if already exists to overwrite
+    const filtered = stored.filter(b => b.bookingId !== booking.bookingId);
+    filtered.push(booking);
+    localStorage.setItem(CONFIG.STORAGE_KEY_BOOKINGS, JSON.stringify(filtered));
   } catch (e) {
     console.error("Failed to save booking in local storage", e);
   }
 }
 
+export function cancelLocalBooking(bookingId) {
+  try {
+    const raw = localStorage.getItem(CONFIG.STORAGE_KEY_BOOKINGS);
+    const stored = JSON.parse(raw || "[]");
+    const target = stored.find(b => b.bookingId && b.bookingId.toUpperCase() === String(bookingId).toUpperCase());
+    if (target) {
+      target.bookingStatus = "Cancelled";
+      localStorage.setItem(CONFIG.STORAGE_KEY_BOOKINGS, JSON.stringify(stored));
+    }
+  } catch (e) {
+    console.error("Failed to cancel booking in local storage", e);
+  }
+}
+
 /**
  * Updates selected treatment and re-validates the active time slot.
- * Returns { slotInvalidated: boolean, previousTime: string, newDurationLabel: string }
  */
 export function selectTreatment(treatmentName, price) {
   const service = SERVICES.find(s => s.name === treatmentName) || {
@@ -75,7 +91,6 @@ export function selectTreatment(treatmentName, price) {
   let slotInvalidated = false;
   const previousTime = bookingState.time;
 
-  // If a time slot was already selected, check if it fits the new treatment's duration
   if (bookingState.time && bookingState.date) {
     const allBookings = getAllBookingsForDate(bookingState.date);
     const status = getSlotAvailabilityStatus(
@@ -92,6 +107,10 @@ export function selectTreatment(treatmentName, price) {
   }
 
   return { slotInvalidated, previousTime, newDurationLabel: service.durationLabel };
+}
+
+export function selectStylist(stylistName) {
+  bookingState.stylist = String(stylistName || "First Available Pro").trim();
 }
 
 export function selectDate(isoStr, displayStr) {

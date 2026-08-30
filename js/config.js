@@ -4,9 +4,12 @@
 
 export const CONFIG = {
   SALON_NAME: "Thangaraja Men's Salon",
+  SALON_ADDRESS: "Main Street Salon Plaza, Near City Center",
+  SALON_PHONE: "+919876543210",
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzqF35_WZsrH5-bVPYWaPYP20DklEfmxLd8uc78BYtOS4UAFtjUrHE0nqFMLoIeB06W2Q/exec",
   CASHFREE_PAYMENT_URL: "https://payments.cashfree.com/forms/getaudit",
   STORAGE_KEY_BOOKINGS: "thangaraja_salon_confirmed_bookings",
+  MAX_BOOKING_DAYS_AHEAD: 3, // Strict 3-day rolling window
 
   // Operating Schedule Constants (in minutes from midnight)
   SCHEDULE: {
@@ -31,6 +34,13 @@ export const OPERATING_SLOTS = [
   "05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM",
   "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM",
   "09:00 PM", "09:30 PM"
+];
+
+// Available Stylists / Barbers
+export const STYLISTS = [
+  { id: "any", name: "First Available Pro", desc: "Recommended • Fastest seat allocation" },
+  { id: "raja", name: "Raja (Master Barber)", desc: "12+ Yrs Exp • Signature Cuts & Shaves" },
+  { id: "kumar", name: "Kumar (Senior Stylist)", desc: "Texture, Fades & Hair Treatments" }
 ];
 
 // Full 11 Salon Services Catalog with Duration in Minutes

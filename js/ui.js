@@ -2,18 +2,21 @@
  * Thangaraja Salon - UI Rendering & View Controller
  */
 
-import { CONFIG, SERVICES, OPERATING_SLOTS } from './config.js';
-import { getSlotAvailabilityStatus } from './duration.js';
+import { CONFIG, SERVICES, STYLISTS, OPERATING_SLOTS } from './config.js';
+import { getSlotAvailabilityStatus, parseTimeToMinutes, getTreatmentDuration } from './duration.js';
 import {
   bookingState,
   selectTreatment as stateSelectTreatment,
+  selectStylist as stateSelectStylist,
   selectDate as stateSelectDate,
   selectTime as stateSelectTime,
   setCustomer,
   setPayment,
   getAllBookingsForDate
 } from './state.js';
-import { fetchServerBookedSlots } from './api.js';
+import { fetchServerBookedSlots, cancelRemoteBooking } from './api.js';
+
+let countdownInterval = null;
 
 /**
  * Renders all 11 treatment cards dynamically into #treatments-grid-container.
@@ -80,9 +83,45 @@ export function onTreatmentCardClick(name, price, cardElement) {
 }
 
 /**
- * Renders 7 date selector pills (Today + 6 days).
+ * Renders Stylist Selection cards.
  */
-export function renderDatePills(baseDate) {
+export function renderStylists() {
+  const container = document.getElementById("stylists-container");
+  if (!container) return;
+  container.innerHTML = "";
+
+  STYLISTS.forEach(stylist => {
+    const isSelected = (bookingState.stylist === stylist.name);
+    const card = document.createElement("div");
+    card.className = `stylist-card ${isSelected ? "selected" : ""}`;
+    card.innerHTML = `
+      <div class="stylist-avatar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      </div>
+      <div class="stylist-info">
+        <h5 class="stylist-name">${stylist.name}</h5>
+        <p class="stylist-desc">${stylist.desc}</p>
+      </div>
+      <div class="select-radio">
+        <span class="select-radio-inner"></span>
+      </div>
+    `;
+
+    card.onclick = () => {
+      stateSelectStylist(stylist.name);
+      document.querySelectorAll(".stylist-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      updateSummary();
+    };
+
+    container.appendChild(card);
+  });
+}
+
+/**
+ * Renders EXACTLY 3 date selector pills (Today, Tomorrow, Day After Tomorrow).
+ */
+export function renderDatePills(baseDate = new Date()) {
   const tabsContainer = document.getElementById("quick-date-tabs");
   if (!tabsContainer) return;
   tabsContainer.innerHTML = "";
@@ -90,7 +129,29 @@ export function renderDatePills(baseDate) {
   const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  for (let i = 0; i < 7; i++) {
+  // Configure native date picker bounds (Today to Today + 2 days)
+  const nativeInput = document.getElementById("native-date-input");
+  const today = new Date(baseDate);
+  const maxDay = new Date(baseDate);
+  maxDay.setDate(baseDate.getDate() + (CONFIG.MAX_BOOKING_DAYS_AHEAD - 1));
+
+  const tYear = today.getFullYear();
+  const tMonth = String(today.getMonth() + 1).padStart(2, '0');
+  const tDay = String(today.getDate()).padStart(2, '0');
+  const minIsoStr = `${tYear}-${tMonth}-${tDay}`;
+
+  const mYear = maxDay.getFullYear();
+  const mMonth = String(maxDay.getMonth() + 1).padStart(2, '0');
+  const mDay = String(maxDay.getDate()).padStart(2, '0');
+  const maxIsoStr = `${mYear}-${mMonth}-${mDay}`;
+
+  if (nativeInput) {
+    nativeInput.min = minIsoStr;
+    nativeInput.max = maxIsoStr;
+  }
+
+  // Generate strictly 3 rolling days
+  for (let i = 0; i < CONFIG.MAX_BOOKING_DAYS_AHEAD; i++) {
     const d = new Date(baseDate);
     d.setDate(baseDate.getDate() + i);
 
@@ -105,18 +166,22 @@ export function renderDatePills(baseDate) {
 
     const pill = document.createElement("div");
 
+    let dayLabel = "TODAY";
+    if (i === 1) dayLabel = "TOMORROW";
+    if (i === 2) dayLabel = daysOfWeek[d.getDay()];
+
     if (isTuesday) {
       pill.className = "date-pill holiday-pill";
       pill.innerHTML = `
-        <div class="date-weekday" style="color:var(--error); font-weight:700;">TUE</div>
+        <div class="date-weekday" style="color:var(--error); font-weight:700;">TUE (${dayLabel})</div>
         <div class="date-day" style="color:var(--text-muted);">${d.getDate()}</div>
-        <div class="date-month" style="color:var(--error); font-size:0.65rem; font-weight:800;">CLOSED</div>
+        <div class="date-month" style="color:var(--error); font-size:0.7rem; font-weight:800;">CLOSED</div>
       `;
-      pill.onclick = () => showToast("Tuesday is our weekly holiday (Closed). Please select another day.", "warning");
+      pill.onclick = () => showToast("Tuesday is our weekly holiday (Closed). Please choose another day.", "warning");
     } else {
       pill.className = `date-pill ${isSelected ? "selected" : ""}`;
       pill.innerHTML = `
-        <div class="date-weekday">${i === 0 ? "TODAY" : daysOfWeek[d.getDay()]}</div>
+        <div class="date-weekday">${dayLabel}</div>
         <div class="date-day">${d.getDate()}</div>
         <div class="date-month">${months[d.getMonth()]}</div>
       `;
@@ -151,17 +216,28 @@ export async function onDatePillClick(isoStr, displayStr) {
 }
 
 /**
- * Handles manual native date picker change.
+ * Handles manual native date picker change with 3-day window validation.
  */
 export async function onManualDateChange(selectedIso) {
   if (!selectedIso) return;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const maxAllowed = new Date(today);
+  maxAllowed.setDate(today.getDate() + (CONFIG.MAX_BOOKING_DAYS_AHEAD - 1));
+
   const chosen = new Date(selectedIso + "T00:00:00");
 
   if (chosen < today) {
-    showToast("Cannot select past dates", "error");
+    showToast("Cannot select past dates.", "error");
+    const nativeInput = document.getElementById("native-date-input");
+    if (nativeInput) nativeInput.value = bookingState.date;
+    return;
+  }
+
+  if (chosen > maxAllowed) {
+    showToast("Bookings are only accepted up to 3 days in advance.", "warning");
     const nativeInput = document.getElementById("native-date-input");
     if (nativeInput) nativeInput.value = bookingState.date;
     return;
@@ -201,7 +277,7 @@ export function renderTimeSlots() {
         <div class="holiday-closed-banner">
           <div class="closed-icon">🔒</div>
           <h4 class="closed-title">Salon Closed on Tuesdays</h4>
-          <p class="closed-desc">Tuesday is our scheduled weekly holiday. Please choose any other day (Wednesday to Monday).</p>
+          <p class="closed-desc">Tuesday is our scheduled weekly holiday. Please choose any other day in our 3-day window.</p>
         </div>
       `;
       return;
@@ -278,6 +354,7 @@ export function updateSummary() {
   }
 
   const elTreatment = document.getElementById("sum-treatment");
+  const elStylist = document.getElementById("sum-stylist");
   const elDate = document.getElementById("sum-date");
   const elTime = document.getElementById("sum-time");
   const elCustomer = document.getElementById("sum-customer");
@@ -286,6 +363,7 @@ export function updateSummary() {
   const elTotal = document.getElementById("sum-total");
 
   if (elTreatment) elTreatment.textContent = `${bookingState.treatment} (${bookingState.durationLabel})`;
+  if (elStylist) elStylist.textContent = bookingState.stylist || "First Available Pro";
   if (elDate) elDate.textContent = bookingState.displayDate || bookingState.date || "Today";
   if (elTime) {
     elTime.textContent = bookingState.time ? bookingState.time : "Please select slot";
@@ -351,24 +429,175 @@ export function goToBookingStep(stepNumber) {
 }
 
 /**
+ * Helper to generate Google Calendar Event URL.
+ */
+export function getGoogleCalendarUrl(booking) {
+  if (!booking.date || !booking.time) return "#";
+
+  const slotMins = parseTimeToMinutes(booking.time);
+  const durMins = booking.durationMins || getTreatmentDuration(booking.treatment);
+  const endMins = slotMins + durMins;
+
+  const dateClean = booking.date.replace(/-/g, "");
+
+  const startH = String(Math.floor(slotMins / 60)).padStart(2, '0');
+  const startM = String(slotMins % 60).padStart(2, '0');
+  const endH = String(Math.floor(endMins / 60)).padStart(2, '0');
+  const endM = String(endMins % 60).padStart(2, '0');
+
+  // Format: YYYYMMDDTHHMMSS (local Indian time)
+  const startIso = `${dateClean}T${startH}${startM}00`;
+  const endIso = `${dateClean}T${endH}${endM}00`;
+
+  const title = encodeURIComponent(`${CONFIG.SALON_NAME}: ${booking.treatment}`);
+  const details = encodeURIComponent(
+    `Confirmed Appointment at ${CONFIG.SALON_NAME}\n` +
+    `Booking ID: #${booking.bookingId}\n` +
+    `Treatment: ${booking.treatment} (${booking.durationLabel || '30 mins'})\n` +
+    `Stylist: ${booking.stylist || 'First Available Pro'}\n` +
+    `Total: ₹${booking.price}\n\n` +
+    `📌 Important: Please arrive 10 minutes early at the salon!`
+  );
+  const location = encodeURIComponent(`${CONFIG.SALON_ADDRESS}`);
+
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${startIso}/${endIso}&details=${details}&location=${location}`;
+}
+
+/**
+ * Helper to generate Apple Calendar / Outlook iCal (.ics) file.
+ */
+export function downloadIcsFile(booking) {
+  if (!booking.date || !booking.time) return;
+
+  const slotMins = parseTimeToMinutes(booking.time);
+  const durMins = booking.durationMins || getTreatmentDuration(booking.treatment);
+  const endMins = slotMins + durMins;
+
+  const dateClean = booking.date.replace(/-/g, "");
+  const startH = String(Math.floor(slotMins / 60)).padStart(2, '0');
+  const startM = String(slotMins % 60).padStart(2, '0');
+  const endH = String(Math.floor(endMins / 60)).padStart(2, '0');
+  const endM = String(endMins % 60).padStart(2, '0');
+
+  const icsData = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Thangaraja Salon//Appointment Booking//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${booking.bookingId || 'booking'}@thangarajasalon.com`,
+    `DTSTAMP:${dateClean}T000000Z`,
+    `DTSTART:${dateClean}T${startH}${startM}00`,
+    `DTEND:${dateClean}T${endH}${endM}00`,
+    `SUMMARY:${CONFIG.SALON_NAME} - ${booking.treatment}`,
+    `DESCRIPTION:Confirmed Booking #${booking.bookingId}\\nTreatment: ${booking.treatment}\\nStylist: ${booking.stylist || 'Pro'}\\nPlease arrive 10 mins early!`,
+    `LOCATION:${CONFIG.SALON_ADDRESS}`,
+    "STATUS:CONFIRMED",
+    "BEGIN:VALARM",
+    "TRIGGER:-PT15M",
+    "ACTION:DISPLAY",
+    "DESCRIPTION:Appointment Reminder (Arrive 10m early)",
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].join("\r\n");
+
+  const blob = new Blob([icsData], { type: "text/calendar;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Thangaraja_Salon_${booking.bookingId || 'Appointment'}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/**
+ * Starts live countdown to appointment.
+ */
+export function startLiveCountdown(dateStr, timeStr) {
+  if (countdownInterval) clearInterval(countdownInterval);
+
+  const countdownBox = document.getElementById("live-chair-countdown");
+  if (!countdownBox) return;
+
+  function update() {
+    if (!dateStr || !timeStr) {
+      countdownBox.style.display = "none";
+      return;
+    }
+
+    const slotMins = parseTimeToMinutes(timeStr);
+    const targetDate = new Date(`${dateStr}T00:00:00`);
+    targetDate.setMinutes(slotMins);
+
+    const now = new Date();
+    const diffMs = targetDate - now;
+
+    if (diffMs <= 0) {
+      countdownBox.innerHTML = `<strong>Status:</strong> Ready for Service / Active Now`;
+      countdownBox.style.display = "block";
+      return;
+    }
+
+    const diffMins = Math.floor(diffMs / 60000);
+    const hours = Math.floor(diffMins / 60);
+    const mins = diffMins % 60;
+
+    countdownBox.innerHTML = `⏳ <strong>Chair Opens In:</strong> ${hours > 0 ? `${hours}h ` : ""}${mins} mins (Arrive 10m early)`;
+    countdownBox.style.display = "block";
+  }
+
+  update();
+  countdownInterval = setInterval(update, 60000);
+}
+
+/**
  * Displays booking details in Step 4 confirmation screen.
  */
 export function displayBookingConfirmation(bookingId) {
   const elConfirmId = document.getElementById("confirm-booking-id");
   const elSumStatus = document.getElementById("sum-booking-status");
   const elWhatsAppBtn = document.getElementById("btn-whatsapp-share");
+  const elGCalBtn = document.getElementById("btn-gcal-sync");
+  const elIcalBtn = document.getElementById("btn-ical-download");
+  const elCancelBtn = document.getElementById("btn-cancel-this-booking");
 
   if (elConfirmId) elConfirmId.textContent = `#${bookingId}`;
   if (elSumStatus) {
-    elSumStatus.textContent = "Confirmed";
-    elSumStatus.className = "badge badge-success";
+    elSumStatus.textContent = bookingState.bookingStatus || "Confirmed";
+    elSumStatus.className = (bookingState.bookingStatus === "Cancelled")
+      ? "badge badge-error"
+      : "badge badge-success";
   }
 
+  // Google Calendar URL
+  if (elGCalBtn) {
+    elGCalBtn.href = getGoogleCalendarUrl(bookingState);
+  }
+
+  // iCal Download
+  if (elIcalBtn) {
+    elIcalBtn.onclick = () => downloadIcsFile(bookingState);
+  }
+
+  // Cancel Button
+  if (elCancelBtn) {
+    if (bookingState.bookingStatus === "Cancelled") {
+      elCancelBtn.style.display = "none";
+    } else {
+      elCancelBtn.style.display = "inline-flex";
+      elCancelBtn.onclick = () => promptCancelBooking(bookingId);
+    }
+  }
+
+  // WhatsApp Alert
   if (elWhatsAppBtn) {
     const msg = encodeURIComponent(
       `Hello ${CONFIG.SALON_NAME}! Here is my confirmed appointment:\n` +
       `Booking ID: #${bookingId}\n` +
       `Treatment: ${bookingState.treatment} (${bookingState.durationLabel})\n` +
+      `Stylist: ${bookingState.stylist}\n` +
       `Date: ${bookingState.displayDate || bookingState.date}\n` +
       `Time: ${bookingState.time}\n` +
       `Total: ₹${bookingState.price}\n` +
@@ -378,7 +607,42 @@ export function displayBookingConfirmation(bookingId) {
     elWhatsAppBtn.href = `https://wa.me/?text=${msg}`;
   }
 
+  startLiveCountdown(bookingState.date, bookingState.time);
   goToBookingStep(4);
+}
+
+/**
+ * Prompts customer before executing booking cancellation.
+ */
+export async function promptCancelBooking(bookingId) {
+  const confirmed = confirm(
+    `Are you sure you want to cancel appointment #${bookingId}?\n\nThis will immediately release your chair reservation.`
+  );
+  if (!confirmed) return;
+
+  try {
+    showToast("Cancelling appointment...", "info");
+    await cancelRemoteBooking(bookingId);
+    bookingState.bookingStatus = "Cancelled";
+
+    const elSumStatus = document.getElementById("sum-booking-status");
+    if (elSumStatus) {
+      elSumStatus.textContent = "Cancelled";
+      elSumStatus.className = "badge badge-error";
+    }
+
+    const elCancelBtn = document.getElementById("btn-cancel-this-booking");
+    if (elCancelBtn) elCancelBtn.style.display = "none";
+
+    const countdownBox = document.getElementById("live-chair-countdown");
+    if (countdownBox) countdownBox.style.display = "none";
+
+    showToast(`Appointment #${bookingId} has been successfully cancelled. Your time slot has been released.`, "success");
+    await fetchServerBookedSlots(bookingState.date);
+    renderTimeSlots();
+  } catch (err) {
+    showToast(err.message || "Failed to cancel booking. Please try again.", "error");
+  }
 }
 
 /**
@@ -388,6 +652,7 @@ export function displayBookingDetails(booking) {
   bookingState.bookingId = booking.bookingId;
   bookingState.treatment = booking.treatment;
   bookingState.price = booking.price || 130;
+  bookingState.stylist = booking.stylist || "First Available Pro";
   bookingState.date = booking.date;
   bookingState.displayDate = booking.date;
   bookingState.time = booking.time;

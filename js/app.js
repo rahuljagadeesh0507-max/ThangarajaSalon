@@ -2,7 +2,7 @@
  * Thangaraja Salon - Application Bootstrap & Event Controller
  */
 
-import { CONFIG, SERVICES } from './config.js';
+import { CONFIG, SERVICES, STYLISTS } from './config.js';
 import {
   bookingState,
   selectPayment as stateSelectPayment,
@@ -16,6 +16,7 @@ import {
 } from './api.js';
 import {
   renderTreatments,
+  renderStylists,
   renderDatePills,
   renderTimeSlots,
   updateSummary,
@@ -24,7 +25,8 @@ import {
   displayBookingDetails,
   showToast,
   onManualDateChange,
-  onDatePillClick
+  onDatePillClick,
+  promptCancelBooking
 } from './ui.js';
 
 /**
@@ -52,17 +54,8 @@ async function initApp() {
   bookingState.date = isoStr;
   bookingState.displayDate = displayStr;
 
-  const nativeInput = document.getElementById("native-date-input");
-  if (nativeInput) {
-    const today = new Date();
-    const tYear = today.getFullYear();
-    const tMonth = String(today.getMonth() + 1).padStart(2, '0');
-    const tDay = String(today.getDate()).padStart(2, '0');
-    nativeInput.min = `${tYear}-${tMonth}-${tDay}`;
-    nativeInput.value = isoStr;
-  }
-
   renderTreatments();
+  renderStylists();
   renderDatePills(new Date());
   renderTimeSlots();
   updateSummary();
@@ -208,6 +201,7 @@ async function handleFinalSubmit() {
     phone: bookingState.phone.replace(/\D/g, ''),
     treatment: bookingState.treatment,
     durationMins: String(bookingState.durationMins),
+    stylist: bookingState.stylist,
     price: String(bookingState.price),
     date: bookingState.date,
     time: bookingState.time,
@@ -224,6 +218,7 @@ async function handleFinalSubmit() {
       time: bookingState.time,
       treatment: bookingState.treatment,
       durationMins: bookingState.durationMins,
+      stylist: bookingState.stylist,
       price: bookingState.price,
       name: bookingState.name,
       email: bookingState.email,
@@ -296,6 +291,7 @@ async function handleTrackStatusLookup() {
   showToast(`Booking #${id} was not found. Please verify your Booking ID.`, "error");
 }
 
-// Expose any required globals for legacy inline handlers if any
+// Expose required globals
 window.goToBookingStep = goToBookingStep;
 window.onManualDateChange = onManualDateChange;
+window.promptCancelBooking = promptCancelBooking;

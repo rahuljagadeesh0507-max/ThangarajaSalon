@@ -3,7 +3,7 @@
  */
 
 import { CONFIG } from './config.js';
-import { setServerBookedList } from './state.js';
+import { setServerBookedList, cancelLocalBooking } from './state.js';
 
 export const IS_HTTP_HOSTED = window.location.protocol.startsWith("http");
 
@@ -80,4 +80,33 @@ export async function lookupRemoteBooking(bookingId) {
   }
 
   return null;
+}
+
+/**
+ * Cancels a booking in the backend and marks local cache as cancelled.
+ */
+export async function cancelRemoteBooking(bookingId) {
+  const cleanId = String(bookingId || "").trim().toUpperCase();
+  const cancelUrl = IS_HTTP_HOSTED
+    ? "/api/cancel"
+    : `${CONFIG.SCRIPT_URL}?action=cancel&bookingId=${encodeURIComponent(cleanId)}`;
+
+  const response = await fetch(cancelUrl, {
+    method: "POST",
+    body: JSON.stringify({ action: "cancel", bookingId: cleanId }),
+    headers: { "Content-Type": "application/json" }
+  });
+
+  if (response.status === 429) {
+    throw new Error("RATE_LIMITED");
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (data && data.success === false) {
+    throw new Error(data.message || data.error || "CANCEL_FAILED");
+  }
+
+  cancelLocalBooking(cleanId);
+  return data || { success: true, bookingId: cleanId };
 }

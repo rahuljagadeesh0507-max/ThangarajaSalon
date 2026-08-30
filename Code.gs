@@ -1,11 +1,12 @@
 /**
- * Thangaraja Salon - Google Apps Script Backend (Duration & Overlap Hardened)
+ * Thangaraja Salon - Google Apps Script Backend (Duration, Overlap & Cancellation Hardened)
  * 
  * Features:
  * - Treatment Duration Mapping & Multi-Slot Overlap Detection
  * - Break Time & Closing Time Boundary Enforcement
  * - Anti-Formula Injection (CSV/Spreadsheet injection defense)
  * - Atomic Concurrency Locking (LockService) to prevent double-bookings
+ * - Self-Service Appointment Cancellation & Instant Slot Release
  * - Complete 12-Column Schema with zero data loss
  * - Dynamic Booked Slots querying and Real Booking Lookup
  */
@@ -207,6 +208,44 @@ function lookupBooking_(sheet, bookingId) {
   return null;
 }
 
+function cancelBooking_(sheet, bookingId) {
+  const searchId = String(bookingId || "").trim().toUpperCase();
+  if (!searchId) {
+    return { success: false, error: "MISSING_BOOKING_ID", message: "Booking ID is required to cancel an appointment." };
+  }
+
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+  } catch (e) {
+    return { success: false, error: "LOCK_TIMEOUT", message: "Server is busy processing. Please try again in a few moments." };
+  }
+
+  try {
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return { success: false, error: "NOT_FOUND", message: "Booking ID not found." };
+    }
+
+    for (let i = 1; i < data.length; i++) {
+      const rowId = String(data[i][1] || "").trim().toUpperCase();
+      if (rowId === searchId) {
+        // Update Column 12 (Booking Status)
+        sheet.getRange(i + 1, 12).setValue("Cancelled");
+        return {
+          success: true,
+          bookingId: searchId,
+          message: "Appointment successfully cancelled. The time slot is now released."
+        };
+      }
+    }
+
+    return { success: false, error: "NOT_FOUND", message: "Booking ID not found." };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function saveBooking_(params) {
   const name = sanitizeSpreadsheetInput_(params.name);
   const email = sanitizeSpreadsheetInput_(params.email);
@@ -322,6 +361,11 @@ function handleRequest_(e) {
       } else {
         return jsonOutput_({ success: false, error: "NOT_FOUND", message: "Booking ID not found." });
       }
+    }
+
+    if (action === "cancel") {
+      const result = cancelBooking_(sheet, params.bookingId);
+      return jsonOutput_(result);
     }
 
     const result = saveBooking_(params);
