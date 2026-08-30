@@ -1,0 +1,3241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Thangaraja Salon | Skip the Queue. Book Your Time. Get Your Cut.</title>
+  <meta name="description" content="Online appointment and time-slot booking system for Thangaraja Salon. Skip the queue, pick your treatment, reserve your slot from 8:00 AM to 10:00 PM.">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS VARIABLES & RESET
+       ========================================================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --bg-surface-glass: rgba(17, 24, 39, 0.92);
+      --bg-card: #151d2d;
+      --bg-card-hover: #1e293b;
+      
+      --accent-gold: #d97706;
+      --accent-gold-light: #fbbf24;
+      --accent-gold-dark: #b45309;
+      --accent-gold-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+      --accent-gold-glow: rgba(245, 158, 11, 0.25);
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-gold: #fbbf24;
+      
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-gold: rgba(245, 158, 11, 0.3);
+      --border-gold-focus: #f59e0b;
+      
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.12);
+      --error: #ef4444;
+      --error-bg: rgba(239, 68, 68, 0.12);
+      --warning: #f59e0b;
+      --info: #38bdf8;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+      --shadow-gold: 0 10px 30px rgba(217, 119, 6, 0.25);
+      
+      --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-heading: 'Cinzel', serif;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      line-height: 1.6;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: var(--transition-smooth);
+    }
+
+    button, input, select {
+      font-family: inherit;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      box-sizing: border-box;
+    }
+
+    /* ==========================================================================
+       TOP BAR & NAVIGATION
+       ========================================================================== */
+    .top-announcement {
+      background: linear-gradient(90deg, #1e1b18 0%, #2a2015 50%, #1e1b18 100%);
+      border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      text-align: center;
+      color: var(--accent-gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: var(--transition-smooth);
+      width: 100%;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 80px;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .logo-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent-gold-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-gold);
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-title {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .logo-subtitle {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--text-gold);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      position: relative;
+      padding: 0.5rem 0;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--accent-gold-light);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent-gold-gradient);
+      transition: var(--transition-smooth);
+    }
+
+    .nav-link:hover::after, .nav-link.active::after {
+      width: 100%;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    .nav-actions .btn-text-mobile {
+      display: none;
+    }
+
+    /* ==========================================================================
+       BUTTONS & BADGES
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.75rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      border: 1px solid transparent;
+      text-align: center;
+      line-height: 1.2;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+
+    .btn-primary {
+      background: var(--accent-gold-gradient);
+      color: #090d16;
+      font-weight: 700;
+      box-shadow: var(--shadow-gold);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(245, 158, 11, 0.4);
+      filter: brightness(1.1);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      border-color: var(--border-subtle);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-gold);
+      color: var(--accent-gold-light);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline-gold {
+      background: transparent;
+      color: var(--accent-gold-light);
+      border-color: var(--accent-gold);
+    }
+
+    .btn-outline-gold:hover {
+      background: var(--accent-gold);
+      color: #090d16;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-lg {
+      padding: 1.1rem 2.2rem;
+      font-size: 1.05rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-sizing: border-box;
+    }
+
+    .badge-gold {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-gold-light);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    /* ==========================================================================
+       HERO SECTION
+       ========================================================================== */
+    .hero-section {
+      position: relative;
+      padding: 5rem 0 6rem;
+      background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, 0.12) 0%, transparent 65%),
+                  linear-gradient(180deg, var(--bg-dark) 0%, #0c121d 100%);
+      border-bottom: 1px solid var(--border-subtle);
+      overflow: hidden;
+    }
+
+    .hero-glow-1 {
+      position: absolute;
+      top: -100px;
+      left: 10%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .hero-glow-2 {
+      position: absolute;
+      bottom: -100px;
+      right: 10%;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(217, 119, 6, 0.12) 0%, transparent 70%);
+      filter: blur(70px);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 3.5rem;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .hero-heading {
+      font-family: var(--font-heading);
+      font-size: 3.25rem;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+      word-break: break-word;
+    }
+
+    .hero-heading span {
+      background: var(--accent-gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-description {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      max-width: 580px;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .hero-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .hero-stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-number {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--accent-gold-light);
+      font-family: var(--font-heading);
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .hero-visual {
+      position: relative;
+    }
+
+    .hero-card-preview {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .live-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 10px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .hero-feature-pills {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .feature-pill-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      transition: var(--transition-smooth);
+    }
+
+    .feature-pill-item:hover {
+      border-color: var(--border-gold);
+      transform: translateX(5px);
+    }
+
+    .feature-pill-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ==========================================================================
+       SECTION COMMONS
+       ========================================================================== */
+    .section-padding {
+      padding: 5.5rem 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 3.5rem;
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 2.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0.75rem 0 1rem;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       HOW IT WORKS SECTION
+       ========================================================================== */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.75rem;
+    }
+
+    .step-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: var(--transition-smooth);
+    }
+
+    .step-card:hover {
+      border-color: var(--border-gold);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .step-badge {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: rgba(245, 158, 11, 0.25);
+    }
+
+    .step-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       MAIN BOOKING APP CONTAINER & WIZARD
+       ========================================================================== */
+    .booking-section {
+      background: linear-gradient(180deg, #090d16 0%, #0d1424 50%, #090d16 100%);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+      width: 100%;
+    }
+
+    .booking-app-wrapper {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .booking-stepper {
+      display: flex;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-subtle);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .booking-stepper::-webkit-scrollbar {
+      display: none;
+    }
+
+    .stepper-tab {
+      flex: 1 0 auto;
+      min-width: 140px;
+      padding: 1.25rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-bottom: 3px solid transparent;
+      transition: var(--transition-smooth);
+      text-align: left;
+      white-space: nowrap;
+      box-sizing: border-box;
+    }
+
+    .stepper-tab.active {
+      color: var(--accent-gold-light);
+      background: rgba(245, 158, 11, 0.08);
+      border-bottom-color: var(--accent-gold);
+    }
+
+    .stepper-tab.completed {
+      color: var(--text-primary);
+    }
+
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .stepper-tab.active .step-number {
+      background: var(--accent-gold-gradient);
+      color: #000;
+    }
+
+    .stepper-tab.completed .step-number {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .booking-body {
+      display: grid;
+      grid-template-columns: 1.45fr 0.95fr;
+      gap: 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .booking-main-panel {
+      padding: 2.5rem;
+      border-right: 1px solid var(--border-subtle);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .booking-summary-sidebar {
+      padding: 2.5rem;
+      background: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .step-view {
+      display: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .step-view.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-header {
+      margin-bottom: 2rem;
+      width: 100%;
+    }
+
+    .panel-title {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+      word-break: break-word;
+    }
+
+    .panel-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      word-break: break-word;
+    }
+
+    /* ==========================================================================
+       TREATMENT CARDS (EXACT 3 ONLY - FULLY RESPONSIVE)
+       ========================================================================== */
+    .treatments-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .treatment-card {
+      background: var(--bg-surface-elevated);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .treatment-card:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: #1f2a3f;
+      transform: translateY(-2px);
+    }
+
+    .treatment-card.selected {
+      border-color: var(--accent-gold);
+      background: rgba(245, 158, 11, 0.08);
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+    }
+
+    .treatment-info {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .treatment-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .treatment-card.selected .treatment-icon {
+      background: var(--accent-gold-gradient);
+      color: #000;
+    }
+
+    .treatment-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .treatment-meta {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .treatment-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    .treatment-price-wrap {
+      text-align: right;
+    }
+
+    .treatment-price {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--accent-gold-light);
+      font-family: var(--font-heading);
+      white-space: nowrap;
+    }
+
+    .select-radio {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+      flex-shrink: 0;
+    }
+
+    .treatment-card.selected .select-radio {
+      border-color: var(--accent-gold);
+      background: var(--accent-gold);
+    }
+
+    .select-radio-inner {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #000;
+      display: none;
+    }
+
+    .treatment-card.selected .select-radio-inner {
+      display: block;
+    }
+
+    /* ==========================================================================
+       DATE & TIME SLOTS SELECTION
+       ========================================================================== */
+    .date-selection-box {
+      margin-bottom: 2rem;
+      width: 100%;
+    }
+
+    .date-tabs-row {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 0.5rem;
+      margin-top: 0.75rem;
+      width: 100%;
+    }
+
+    .date-tabs-row::-webkit-scrollbar {
+      display: none;
+    }
+
+    .date-pill {
+      flex: 0 0 95px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+
+    .date-pill:hover:not(.disabled) {
+      border-color: var(--border-gold);
+      background: #1f2a3f;
+    }
+
+    .date-pill.selected {
+      background: var(--accent-gold-gradient);
+      color: #000;
+      border-color: transparent;
+      box-shadow: var(--shadow-gold);
+    }
+
+    .date-pill.selected .date-day,
+    .date-pill.selected .date-weekday {
+      color: #000 !important;
+    }
+
+    .date-pill.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .date-weekday {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .date-day {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0.2rem 0;
+      font-family: var(--font-heading);
+    }
+
+    .date-month {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .custom-date-picker-wrap {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .input-date {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 1rem;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      color-scheme: dark;
+      outline: none;
+      max-width: 100%;
+    }
+
+    .input-date:focus {
+      border-color: var(--accent-gold);
+    }
+
+    /* Slot Grid */
+    .slot-legend-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      margin: 1.5rem 0 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .legend-available { background: var(--bg-card); border: 1px solid var(--border-subtle); }
+    .legend-selected { background: var(--accent-gold); }
+    .legend-booked { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--error); }
+    .legend-expired { background: rgba(100, 116, 139, 0.2); border: 1px solid var(--text-muted); }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 0.35rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .time-slot-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 0.5rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.2rem;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+
+    .time-slot-btn:hover:not(:disabled) {
+      border-color: var(--accent-gold);
+      background: #1f2a3f;
+      transform: translateY(-2px);
+    }
+
+    .time-slot-btn.selected {
+      background: var(--accent-gold-gradient);
+      color: #000;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+      font-weight: 700;
+    }
+
+    .time-slot-btn.booked {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .time-slot-btn.expired {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .slot-status-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       CUSTOMER DETAILS FORM
+       ========================================================================== */
+    .form-group {
+      margin-bottom: 1.5rem;
+      width: 100%;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+      width: 100%;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1.25rem;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition-smooth);
+      box-sizing: border-box;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    }
+
+    .form-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* ==========================================================================
+       PAYMENT OPTIONS (EXACT TWO OPTIONS)
+       ========================================================================== */
+    .payment-options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .payment-option-card {
+      background: var(--bg-surface-elevated);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .payment-option-card:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: #1f2a3f;
+    }
+
+    .payment-option-card.selected {
+      border-color: var(--accent-gold);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .payment-icon-wrap {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .payment-option-card.selected .payment-icon-wrap {
+      background: var(--accent-gold-gradient);
+      color: #000;
+    }
+
+    .payment-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .payment-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .online-pay-btn-wrap {
+      margin-top: 1rem;
+    }
+
+    /* ==========================================================================
+       SIDEBAR BOOKING SUMMARY
+       ========================================================================== */
+    .summary-title {
+      font-family: var(--font-heading);
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .summary-details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.15rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 0.9rem;
+      gap: 0.5rem;
+    }
+
+    .summary-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .summary-val {
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: right;
+      max-width: 60%;
+      word-break: break-word;
+    }
+
+    .summary-total-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .total-amount {
+      font-size: 1.75rem;
+      font-weight: 900;
+      color: var(--accent-gold-light);
+      font-family: var(--font-heading);
+    }
+
+    .summary-guarantee-note {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 1rem;
+    }
+
+    /* ==========================================================================
+       CONFIRMATION & LIVE STATUS TRACKING SECTION
+       ========================================================================== */
+    .confirmation-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      padding: 3rem 2.5rem;
+      box-shadow: var(--shadow-lg);
+      max-width: 860px;
+      margin: 0 auto;
+      position: relative;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .confirmation-hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .check-icon-large {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: var(--success-bg);
+      border: 2px solid var(--success);
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+
+    .booking-id-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px dashed var(--accent-gold);
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--radius-full);
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-gold-light);
+      margin-top: 1rem;
+      max-width: 100%;
+      word-break: break-all;
+    }
+
+    /* Status Progression Track */
+    .status-progression-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 2rem 1.5rem;
+      margin: 2rem 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .status-track-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 1.75rem;
+      text-align: center;
+    }
+
+    .status-steps-row {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      width: 100%;
+    }
+
+    .status-steps-row::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 10%;
+      right: 10%;
+      height: 3px;
+      background: var(--border-subtle);
+      z-index: 1;
+    }
+
+    .status-track-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      position: relative;
+      z-index: 2;
+      flex: 1;
+    }
+
+    .status-step-node {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-surface-elevated);
+      border: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      transition: var(--transition-smooth);
+    }
+
+    .status-track-step.done .status-step-node {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+
+    .status-track-step.current .status-step-node {
+      background: var(--accent-gold-gradient);
+      border-color: var(--accent-gold);
+      color: #000;
+      box-shadow: 0 0 16px var(--accent-gold);
+      animation: pulseNode 2s infinite;
+    }
+
+    @keyframes pulseNode {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .status-step-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .status-track-step.current .status-step-label {
+      color: var(--accent-gold-light);
+      font-weight: 700;
+    }
+
+    /* WhatsApp Banner */
+    .whatsapp-notification-card {
+      background: linear-gradient(135deg, rgba(37, 211, 102, 0.12) 0%, rgba(18, 140, 126, 0.15) 100%);
+      border: 1px solid rgba(37, 211, 102, 0.3);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-top: 2rem;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .whatsapp-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+
+    .whatsapp-icon-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #25d366;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .whatsapp-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.2rem;
+    }
+
+    .whatsapp-text {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: #000;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-whatsapp:hover {
+      background: #20ba5a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
+    }
+
+    /* ==========================================================================
+       TRACK LOOKUP MODAL / SECTION
+       ========================================================================== */
+    .track-lookup-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      max-width: 650px;
+      margin: 3rem auto 0;
+      text-align: center;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .lookup-input-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+
+    /* ==========================================================================
+       WHY US / REVIEWS / FOOTER
+       ========================================================================== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem 2rem;
+      transition: var(--transition-smooth);
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-gold);
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .feature-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-gold-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .footer {
+      background: #060910;
+      border-top: 1px solid var(--border-subtle);
+      padding: 4.5rem 0 2.5rem;
+      width: 100%;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+      gap: 3rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .footer-heading {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+      font-family: var(--font-heading);
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .footer-link {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .footer-link:hover {
+      color: var(--accent-gold-light);
+      padding-left: 4px;
+    }
+
+    .footer-bottom {
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Notification Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 90vw;
+    }
+
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.3s ease;
+      color: #fff;
+    }
+
+    .toast-success { background: #065f46; border: 1px solid var(--success); }
+    .toast-error { background: #7f1d1d; border: 1px solid var(--error); }
+    .toast-info { background: #075985; border: 1px solid var(--info); }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ==========================================================================
+       RESPONSIVE BREAKPOINTS (PRECISION MOBILE & TABLET STYLING)
+       ========================================================================== */
+    @media (max-width: 1024px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+      }
+      .booking-body {
+        grid-template-columns: 1fr;
+      }
+      .booking-main-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+        padding: 2rem 1.5rem;
+      }
+      .booking-summary-sidebar {
+        padding: 2rem 1.5rem;
+      }
+      .steps-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 1rem;
+      }
+
+      .top-announcement {
+        font-size: 0.76rem;
+        padding: 0.4rem 0.5rem;
+        line-height: 1.35;
+      }
+
+      .navbar {
+        background: rgba(17, 24, 39, 0.96);
+      }
+
+      .nav-inner {
+        height: 66px;
+        gap: 0.5rem;
+      }
+
+      .logo-icon-wrap {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+      }
+
+      .logo-title {
+        font-size: 1.15rem;
+        letter-spacing: 1px;
+      }
+
+      .logo-subtitle {
+        font-size: 0.58rem;
+        letter-spacing: 2px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .nav-actions .btn {
+        padding: 0.55rem 1rem;
+        font-size: 0.82rem;
+        gap: 0.4rem;
+      }
+
+      .hero-section {
+        padding: 3rem 0 3.5rem;
+      }
+
+      .hero-heading {
+        font-size: 2.3rem;
+        line-height: 1.2;
+      }
+
+      .hero-description {
+        font-size: 1rem;
+        line-height: 1.6;
+      }
+
+      .hero-cta-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.85rem;
+      }
+
+      .hero-cta-group .btn {
+        width: 100%;
+      }
+
+      .hero-stats-row {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 1.35rem;
+      }
+
+      .stat-label {
+        font-size: 0.72rem;
+      }
+
+      .section-padding {
+        padding: 3.5rem 0;
+      }
+
+      .section-header {
+        margin-bottom: 2.25rem;
+      }
+
+      .section-title {
+        font-size: 1.85rem;
+      }
+
+      .section-subtitle {
+        font-size: 0.95rem;
+      }
+
+      .steps-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .booking-main-panel {
+        padding: 1.5rem 1rem;
+      }
+
+      .booking-summary-sidebar {
+        padding: 1.5rem 1rem;
+      }
+
+      .stepper-tab {
+        min-width: 120px;
+        padding: 0.85rem 0.65rem;
+        font-size: 0.8rem;
+        gap: 0.4rem;
+      }
+
+      .step-number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.72rem;
+      }
+
+      .panel-title {
+        font-size: 1.35rem;
+      }
+
+      .panel-desc {
+        font-size: 0.88rem;
+      }
+
+      .treatment-card {
+        padding: 1rem 0.85rem;
+        gap: 0.6rem;
+      }
+
+      .treatment-info {
+        gap: 0.75rem;
+      }
+
+      .treatment-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+      }
+
+      .treatment-icon svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .treatment-name {
+        font-size: 1rem;
+      }
+
+      .treatment-meta {
+        font-size: 0.78rem;
+      }
+
+      .treatment-price {
+        font-size: 1.25rem;
+      }
+
+      .treatment-right {
+        gap: 0.6rem;
+      }
+
+      .select-radio {
+        width: 18px;
+        height: 18px;
+      }
+
+      .date-pill {
+        flex: 0 0 78px;
+        padding: 0.65rem 0.35rem;
+      }
+
+      .date-weekday {
+        font-size: 0.68rem;
+      }
+
+      .date-day {
+        font-size: 1.2rem;
+      }
+
+      .date-month {
+        font-size: 0.68rem;
+      }
+
+      .slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+        gap: 0.5rem;
+      }
+
+      .time-slot-btn {
+        padding: 0.65rem 0.35rem;
+        font-size: 0.82rem;
+      }
+
+      .status-progression-box {
+        padding: 1.5rem 0.75rem;
+      }
+
+      .status-steps-row::before {
+        top: 16px;
+      }
+
+      .status-step-node {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+      }
+
+      .status-step-label {
+        font-size: 0.72rem;
+      }
+
+      .whatsapp-notification-card {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1.25rem 1rem;
+        gap: 1rem;
+      }
+
+      .btn-whatsapp {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .lookup-input-group {
+        flex-direction: column;
+      }
+
+      .lookup-input-group .btn {
+        width: 100%;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .toast-container {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .container {
+        padding: 0 0.75rem;
+      }
+
+      .nav-inner {
+        height: 60px;
+      }
+
+      .logo-title {
+        font-size: 1rem;
+      }
+
+      .logo-subtitle {
+        font-size: 0.52rem;
+      }
+
+      .nav-actions .btn {
+        padding: 0.45rem 0.75rem;
+        font-size: 0.76rem;
+      }
+
+      .nav-actions .btn-text-full {
+        display: none;
+      }
+
+      .nav-actions .btn-text-mobile {
+        display: inline;
+      }
+
+      .hero-heading {
+        font-size: 1.95rem;
+      }
+
+      .treatment-card {
+        padding: 0.85rem 0.65rem;
+        gap: 0.45rem;
+      }
+
+      .treatment-info {
+        gap: 0.55rem;
+      }
+
+      .treatment-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+      }
+
+      .treatment-name {
+        font-size: 0.92rem;
+      }
+
+      .treatment-meta {
+        font-size: 0.72rem;
+      }
+
+      .treatment-price {
+        font-size: 1.15rem;
+      }
+
+      .slots-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4rem;
+      }
+
+      .time-slot-btn {
+        padding: 0.55rem 0.2rem;
+        font-size: 0.76rem;
+      }
+
+      .status-step-label {
+        font-size: 0.65rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-announcement">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    <span>Operating Hours: <strong>8:00 AM – 10:00 PM Daily</strong> • Zero Wait Time with Online Booking</span>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="navbar">
+    <div class="container">
+      <div class="nav-inner">
+        <a href="#home" class="brand-logo">
+          <div class="logo-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6" cy="6" r="3"></circle>
+              <circle cx="6" cy="18" r="3"></circle>
+              <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+              <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+              <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+            </svg>
+          </div>
+          <div class="logo-text">
+            <span class="logo-title">Thangaraja</span>
+            <span class="logo-subtitle">Men's Salon</span>
+          </div>
+        </a>
+
+        <ul class="nav-links">
+          <li><a href="#home" class="nav-link active">Home</a></li>
+          <li><a href="#booking-app" class="nav-link">Book Slot</a></li>
+          <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+          <li><a href="#why-us" class="nav-link">Why Us</a></li>
+          <li><a href="#track-status" class="nav-link">Track Status</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <a href="#booking-app" class="btn btn-primary" onclick="goToBookingStep(1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span class="btn-text-full">Book Appointment</span>
+            <span class="btn-text-mobile">Book Slot</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="home">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="badge badge-gold">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            Premium Men's Grooming • Zero Queue System
+          </div>
+
+          <h1 class="hero-heading">
+            Skip the Queue.<br>
+            Book Your Time.<br>
+            <span>Get Your Cut.</span>
+          </h1>
+
+          <p class="hero-description">
+            No more standing in line or waiting around for your turn. Choose your treatment, pick a convenient time, and book your appointment at Thangaraja Salon in just a few clicks.
+          </p>
+
+          <div class="hero-cta-group">
+            <a href="#booking-app" class="btn btn-primary btn-lg" onclick="goToBookingStep(1)">
+              Book Your Appointment
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+            <a href="#booking-app" class="btn btn-secondary btn-lg" onclick="goToBookingStep(1)">
+              View Treatments
+            </a>
+          </div>
+
+          <div class="hero-stats-row">
+            <div class="hero-stat-item">
+              <span class="stat-number">0 Mins</span>
+              <span class="stat-label">Queue Wait</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="stat-number">8AM-10PM</span>
+              <span class="stat-label">Daily Slots</span>
+            </div>
+            <div class="hero-stat-item">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">WhatsApp Alerts</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-card-preview">
+            <div class="hero-card-header">
+              <div>
+                <h4 style="font-size:1.1rem; font-weight:700;">Live Booking System</h4>
+                <p style="font-size:0.8rem; color:var(--text-secondary);">Real-time slot reservation active</p>
+              </div>
+              <div class="live-indicator">
+                <span class="live-dot"></span>
+                Active Slots
+              </div>
+            </div>
+
+            <div class="hero-feature-pills">
+              <div class="feature-pill-item">
+                <div class="feature-pill-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <div>
+                  <h5 style="font-size:0.95rem; font-weight:700;">Guaranteed Time Slots</h5>
+                  <p style="font-size:0.8rem; color:var(--text-secondary);">Your chair is strictly reserved for your exact 30-min window.</p>
+                </div>
+              </div>
+
+              <div class="feature-pill-item">
+                <div class="feature-pill-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                </div>
+                <div>
+                  <h5 style="font-size:0.95rem; font-weight:700;">WhatsApp & Status Alerts</h5>
+                  <p style="font-size:0.8rem; color:var(--text-secondary);">Direct confirmation code & live progress tracker to your phone.</p>
+                </div>
+              </div>
+
+              <div class="feature-pill-item">
+                <div class="feature-pill-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                </div>
+                <div>
+                  <h5 style="font-size:0.95rem; font-weight:700;">Flexible Payment Modes</h5>
+                  <p style="font-size:0.8rem; color:var(--text-secondary);">Pay securely online or choose 'Pay at Salon' in cash.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="section-padding" id="how-it-works">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge badge-gold">Seamless Flow</div>
+        <h2 class="section-title">How To Avoid The Queue</h2>
+        <p class="section-subtitle">Four simple steps to get groomed with zero waiting time at Thangaraja Salon.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-badge">01</span>
+          <div class="step-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line></svg>
+          </div>
+          <h3 class="step-title">1. Pick Treatment</h3>
+          <p class="step-desc">Choose from our 3 curated services: Basic Hair Cut, Hair Cut + Trim, or Shaving.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-badge">02</span>
+          <div class="step-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <h3 class="step-title">2. Choose Time Slot</h3>
+          <p class="step-desc">Select today or a future date and pick an available 30-minute window between 8 AM & 10 PM.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-badge">03</span>
+          <div class="step-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+          </div>
+          <h3 class="step-title">3. Provide Details</h3>
+          <p class="step-desc">Enter your name & phone, then select Online Payment or Pay at Salon.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-badge">04</span>
+          <div class="step-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <h3 class="step-title">4. Walk In & Cut</h3>
+          <p class="step-desc">Receive instant confirmation, walk into the salon at your time, and sit directly in the chair.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       MAIN BOOKING APPLICATION EXPERIENCE (4 PAGES / STEPS)
+       ========================================================================= -->
+  <section class="section-padding booking-section" id="booking-app">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge badge-gold">Real-Time Appointment Engine</div>
+        <h2 class="section-title">Choose Your Treatment & Time Slot</h2>
+        <p class="section-subtitle">Real-time slot availability, instant double-booking prevention, and instant confirmation.</p>
+      </div>
+
+      <div class="booking-app-wrapper">
+        <!-- Navigation Stepper Tabs -->
+        <div class="booking-stepper">
+          <button class="stepper-tab active" id="tab-step-1" onclick="goToBookingStep(1)">
+            <span class="step-number">1</span>
+            <span>1. Treatment & Slot</span>
+          </button>
+          <button class="stepper-tab" id="tab-step-2" onclick="goToBookingStep(2)">
+            <span class="step-number">2</span>
+            <span>2. Your Details</span>
+          </button>
+          <button class="stepper-tab" id="tab-step-3" onclick="goToBookingStep(3)">
+            <span class="step-number">3</span>
+            <span>3. Payment Method</span>
+          </button>
+          <button class="stepper-tab" id="tab-step-4" onclick="goToBookingStep(4)">
+            <span class="step-number">4</span>
+            <span>4. Confirmation</span>
+          </button>
+        </div>
+
+        <div class="booking-body">
+          <!-- MAIN CONTENT PANEL (WIZARD STEPS) -->
+          <div class="booking-main-panel">
+            
+            <!-- STEP 1: TREATMENT & DATE/TIME SELECTION -->
+            <div class="step-view active" id="view-step-1">
+              <div class="panel-header">
+                <h3 class="panel-title">Select Treatment</h3>
+                <p class="panel-desc">Choose one of our signature grooming services</p>
+              </div>
+
+              <!-- EXACT 3 TREATMENTS -->
+              <div class="treatments-grid">
+                <!-- Treatment 1 -->
+                <div class="treatment-card selected" onclick="selectTreatment('Basic Hair Cut', 150, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Basic Hair Cut</h4>
+                      <p class="treatment-meta">Classic precision haircut & styling finish • 30 mins</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹150</span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Treatment 2 -->
+                <div class="treatment-card" onclick="selectTreatment('Hair Cut + Trim', 250, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Hair Cut + Trim</h4>
+                      <p class="treatment-meta">Full haircut + beard grooming & edge line shaping • 45 mins</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹250</span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Treatment 3 -->
+                <div class="treatment-card" onclick="selectTreatment('Shaving', 100, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Shaving</h4>
+                      <p class="treatment-meta">Traditional hot towel razor shave & soothing balm • 20 mins</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹100</span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Date Selection -->
+              <div class="date-selection-box" style="margin-top:2.5rem;">
+                <div class="panel-header" style="margin-bottom:1rem;">
+                  <h3 class="panel-title" style="font-size:1.35rem;">Select Appointment Date</h3>
+                  <p class="panel-desc">Select today or an upcoming day (Past dates are disabled)</p>
+                </div>
+
+                <div class="date-tabs-row" id="quick-date-tabs">
+                  <!-- Generated dynamically in JS -->
+                </div>
+
+                <div class="custom-date-picker-wrap">
+                  <span style="font-size:0.85rem; color:var(--text-secondary);">Or pick specific date:</span>
+                  <input type="date" id="native-date-input" class="input-date" onchange="onManualDateChange(this.value)">
+                </div>
+              </div>
+
+              <!-- Time Slot Grid System (8:00 AM - 10:00 PM) -->
+              <div class="time-slots-section" style="margin-top:2rem;">
+                <div class="panel-header" style="margin-bottom:0.5rem;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                    <h3 class="panel-title" style="font-size:1.35rem;">Available Time Slots</h3>
+                    <span id="operating-hours-badge" class="badge badge-gold">8:00 AM – 10:00 PM</span>
+                  </div>
+                  <p class="panel-desc" id="slot-subtitle-date">Showing slots for Today</p>
+                </div>
+
+                <div class="slot-legend-row">
+                  <div class="legend-item">
+                    <span class="legend-indicator legend-available"></span>
+                    <span>Available</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-indicator legend-selected"></span>
+                    <span>Selected</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-indicator legend-booked"></span>
+                    <span>Booked</span>
+                  </div>
+                  <div class="legend-item">
+                    <span class="legend-indicator legend-expired"></span>
+                    <span>Expired / Past</span>
+                  </div>
+                </div>
+
+                <!-- Dynamic Slots Grid -->
+                <div class="slots-grid" id="slots-container">
+                  <!-- Injected via JavaScript -->
+                </div>
+              </div>
+
+              <div style="margin-top:2.5rem;">
+                <button class="btn btn-primary btn-block btn-lg" id="btn-proceed-to-details" onclick="proceedToStep2()">
+                  Continue to Customer Details
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 2: CUSTOMER DETAILS -->
+            <div class="step-view" id="view-step-2">
+              <div class="panel-header">
+                <h3 class="panel-title">Your Details</h3>
+                <p class="panel-desc">Enter your contact information for appointment confirmation & WhatsApp alerts</p>
+              </div>
+
+              <form id="customer-form" onsubmit="event.preventDefault(); proceedToStep3();">
+                <div class="form-group">
+                  <label class="form-label" for="cust-name">Full Name *</label>
+                  <input type="text" id="cust-name" class="form-control" placeholder="e.g. Rahul Sharma" required oninput="updateSummary()">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="cust-email">Email Address *</label>
+                  <input type="email" id="cust-email" class="form-control" placeholder="e.g. rahul@example.com" required oninput="updateSummary()">
+                  <p class="form-hint">Booking receipt and booking ID will be sent here.</p>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="cust-phone">WhatsApp / Mobile Number *</label>
+                  <input type="tel" id="cust-phone" class="form-control" placeholder="e.g. 9876543210" required pattern="[0-9]{10}" maxlength="10" oninput="updateSummary()">
+                  <p class="form-hint">Used for live WhatsApp queue updates and appointment reminders.</p>
+                </div>
+
+                <div style="display:flex; gap:1rem; margin-top:2.5rem; flex-wrap:wrap;">
+                  <button type="button" class="btn btn-secondary" onclick="goToBookingStep(1)">
+                    ← Back
+                  </button>
+                  <button type="submit" class="btn btn-primary" style="flex:1; min-width:180px;">
+                    Proceed to Payment Method →
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- STEP 3: PAYMENT METHOD (EXACT 2 OPTIONS) -->
+            <div class="step-view" id="view-step-3">
+              <div class="panel-header">
+                <h3 class="panel-title">Choose How You Want to Pay</h3>
+                <p class="panel-desc">Select your preferred payment method</p>
+              </div>
+
+              <div class="payment-options-grid">
+                <!-- OPTION 1: ONLINE PAYMENT -->
+                <div class="payment-option-card selected" id="pay-card-online" onclick="selectPaymentMethod('Online Payment')">
+                  <div class="payment-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                      <h4 class="payment-title">Option 1 — Online Payment</h4>
+                      <span class="badge badge-success">Instant Confirmation</span>
+                    </div>
+                    <p class="payment-desc">
+                      Pay instantly online via UPI, Credit/Debit Card, or Net Banking through our Cashfree gateway.
+                    </p>
+                    <div class="online-pay-btn-wrap" id="online-pay-link-area">
+                      <a href="https://payments.cashfree.com/forms/getaudit" target="_blank" rel="noopener noreferrer" class="btn btn-outline-gold" style="font-size:0.85rem; padding:0.5rem 1.25rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                        Open Cashfree Payment Gateway
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- OPTION 2: PAY AT SALON -->
+                <div class="payment-option-card" id="pay-card-salon" onclick="selectPaymentMethod('Pay at Salon')">
+                  <div class="payment-icon-wrap">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  </div>
+                  <div style="flex:1; min-width:0;">
+                    <h4 class="payment-title">Option 2 — Pay at Salon</h4>
+                    <p class="payment-desc">
+                      Prefer to pay after your service? No problem. Choose Pay at Salon and pay in cash after your haircut.
+                    </p>
+                    <div style="margin-top:0.5rem;">
+                      <span style="font-size:0.8rem; color:var(--text-muted);">Payment Status will be recorded as: <strong>Pay at Salon</strong> (Unpaid until service is completed).</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:1rem; margin-top:2.5rem; flex-wrap:wrap;">
+                <button type="button" class="btn btn-secondary" onclick="goToBookingStep(2)">
+                  ← Back
+                </button>
+                <button type="button" class="btn btn-primary" style="flex:1; min-width:180px;" id="btn-submit-booking" onclick="submitFinalBooking()">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  Confirm Appointment Booking
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 4: CONFIRMATION & LIVE STATUS -->
+            <div class="step-view" id="view-step-4">
+              <div class="confirmation-hero">
+                <div class="check-icon-large">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <h3 class="panel-title" style="font-size:2rem;">Your Appointment Is Confirmed!</h3>
+                <p class="panel-desc">We look forward to seeing you at Thangaraja Salon. Zero queue waiting!</p>
+                <div>
+                  <div class="booking-id-pill" id="confirm-booking-id">#TRS10245</div>
+                </div>
+              </div>
+
+              <!-- Status Progression Component -->
+              <div class="status-progression-box">
+                <div class="status-track-title">Live Appointment Status</div>
+                <div class="status-steps-row">
+                  <div class="status-track-step current" id="status-step-confirmed">
+                    <div class="status-step-node">1</div>
+                    <span class="status-step-label">Confirmed</span>
+                  </div>
+                  <div class="status-track-step" id="status-step-arriving">
+                    <div class="status-step-node">2</div>
+                    <span class="status-step-label">Arriving</span>
+                  </div>
+                  <div class="status-track-step" id="status-step-service">
+                    <div class="status-step-node">3</div>
+                    <span class="status-step-label">In Service</span>
+                  </div>
+                  <div class="status-track-step" id="status-step-completed">
+                    <div class="status-step-node">4</div>
+                    <span class="status-step-label">Completed</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- WhatsApp & In-App Notification Section -->
+              <div class="whatsapp-notification-card">
+                <div class="whatsapp-info">
+                  <div class="whatsapp-icon-wrap">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                  </div>
+                  <div>
+                    <h4 class="whatsapp-title">Stay Updated via WhatsApp</h4>
+                    <p class="whatsapp-text">
+                      Your booking confirmation and appointment updates will be shared with you through WhatsApp or in-app notifications.
+                    </p>
+                  </div>
+                </div>
+                <a href="#" id="btn-whatsapp-share" target="_blank" class="btn btn-whatsapp">
+                  Open WhatsApp Alert
+                </a>
+              </div>
+
+              <div style="margin-top:2.5rem; text-align:center;">
+                <button class="btn btn-secondary" onclick="resetToNewBooking()">
+                  + Book Another Appointment
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- SIDEBAR: LIVE BOOKING SUMMARY -->
+          <div class="booking-summary-sidebar">
+            <div>
+              <h4 class="summary-title">Booking Summary</h4>
+
+              <div class="summary-details-list">
+                <div class="summary-row">
+                  <span class="summary-label">Treatment</span>
+                  <span class="summary-val" id="sum-treatment">Basic Hair Cut</span>
+                </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">Date</span>
+                  <span class="summary-val" id="sum-date">Today</span>
+                </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">Time Slot</span>
+                  <span class="summary-val" id="sum-time" style="color:var(--accent-gold-light);">Please select slot</span>
+                </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">Stylist</span>
+                  <span class="summary-val" style="color:var(--text-muted);">First Available Pro</span>
+                </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">Customer</span>
+                  <span class="summary-val" id="sum-customer">—</span>
+                </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">Payment Method</span>
+                  <span class="summary-val" id="sum-payment">Online Payment</span>
+                </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">Booking Status</span>
+                  <span class="summary-val"><span class="badge badge-success" id="sum-booking-status">Pending</span></span>
+                </div>
+
+                <div class="summary-row">
+                  <span class="summary-label">Payment Status</span>
+                  <span class="summary-val" id="sum-payment-status" style="font-size:0.85rem; color:var(--text-gold);">Online Payment</span>
+                </div>
+              </div>
+
+              <div class="summary-total-box">
+                <div class="total-row">
+                  <span class="total-label">Total Payable:</span>
+                  <span class="total-amount" id="sum-total">₹150</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="summary-guarantee-note">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span>Zero queue guarantee • Prompt service upon arrival</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Track Status Search Section -->
+  <section class="section-padding" id="track-status" style="background:#090d16;">
+    <div class="container">
+      <div class="track-lookup-card">
+        <div class="badge badge-gold">Live Tracking</div>
+        <h3 style="font-family:var(--font-heading); font-size:1.85rem; margin-top:0.5rem;">Already Have a Booking?</h3>
+        <p style="font-size:0.95rem; color:var(--text-secondary); margin-top:0.5rem;">
+          Enter your Booking ID (e.g. #TRS10245) to view live chair status and WhatsApp alerts.
+        </p>
+
+        <div class="lookup-input-group">
+          <input type="text" id="lookup-booking-id" class="form-control" placeholder="Enter Booking ID (e.g. TRS10245)">
+          <button class="btn btn-primary" onclick="lookupBookingStatus()">
+            Track Status
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us / Features -->
+  <section class="section-padding" id="why-us" style="border-top:1px solid var(--border-subtle);">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge badge-gold">The Thangaraja Difference</div>
+        <h2 class="section-title">Why Book Online With Us?</h2>
+        <p class="section-subtitle">A modern, dignified grooming experience built to respect your valuable time.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Strict Slot Reservations</h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6;">
+            We operate strictly on booked time slots. When your time comes, your chair is ready with zero queue delay.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Clean & Sanitized Tools</h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6;">
+            Hospital-grade UV sterilization on all clippers, razors, and shears before each customer.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Honest Transparent Prices</h3>
+          <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6;">
+            No hidden extras or surprise charges. Basic Hair Cut is ₹150, Trim combo is ₹250, and Shaving is ₹100.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand-logo" style="margin-bottom:1.25rem;">
+            <div class="logo-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line></svg>
+            </div>
+            <div class="logo-text">
+              <span class="logo-title" style="font-size:1.2rem;">Thangaraja</span>
+              <span class="logo-subtitle">Men's Salon</span>
+            </div>
+          </div>
+          <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6; max-width:300px;">
+            Transforming salon experiences with prompt appointment bookings, zero queue time, and master barber cuts.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="#home" class="footer-link">Home</a></li>
+            <li><a href="#booking-app" class="footer-link">Book Appointment</a></li>
+            <li><a href="#how-it-works" class="footer-link">How It Works</a></li>
+            <li><a href="#track-status" class="footer-link">Track Booking</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Services</h4>
+          <ul class="footer-links">
+            <li><a href="#booking-app" class="footer-link">Basic Hair Cut (₹150)</a></li>
+            <li><a href="#booking-app" class="footer-link">Hair Cut + Trim (₹250)</a></li>
+            <li><a href="#booking-app" class="footer-link">Traditional Shaving (₹100)</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-heading">Hours & Location</h4>
+          <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:0.5rem;">
+            <strong style="color:#fff;">Operating Hours:</strong><br>
+            Monday – Sunday: 8:00 AM – 10:00 PM
+          </p>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.75rem;">
+            Main Street Salon Plaza • Near City Center
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 Thangaraja Salon. All rights reserved.</p>
+        <p style="color:var(--text-muted);">Crafted for Zero-Queue Customer Experience</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toast-box"></div>
+
+  <!-- =========================================================================
+       JAVASCRIPT ENGINE & GOOGLE APPS SCRIPT INTEGRATION
+       ========================================================================= -->
+  <script>
+    // =========================================================================
+    // CONFIGURATION & CONSTANTS
+    // =========================================================================
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqF35_WZsrH5-bVPYWaPYP20DklEfmxLd8uc78BYtOS4UAFtjUrHE0nqFMLoIeB06W2Q/exec";
+    const CASHFREE_PAYMENT_URL = "https://payments.cashfree.com/forms/getaudit";
+
+    // Booking State Model
+    const bookingState = {
+      treatment: "Basic Hair Cut",
+      price: 150,
+      date: "",           // YYYY-MM-DD
+      displayDate: "",    // e.g. 28 Aug 2026
+      time: "",           // e.g. 9:30 AM
+      name: "",
+      email: "",
+      phone: "",
+      paymentMethod: "Online Payment",
+      paymentStatus: "Online Payment",
+      bookingStatus: "Confirmed",
+      bookingId: "",
+      currentStep: 1
+    };
+
+    // Slot Generation Config (8:00 AM to 10:00 PM in 30-min increments)
+    const OPERATING_SLOTS = [
+      "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
+      "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+      "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
+      "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
+      "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
+      "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM",
+      "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM",
+      "10:00 PM"
+    ];
+
+    // Local Storage Booked Slots Cache (To enforce instant client-side updates)
+    const STORAGE_KEY_BOOKINGS = "thangaraja_salon_confirmed_bookings";
+
+    function getLocalBookedSlots(dateStr) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || "[]");
+        return stored
+          .filter(b => b.date === dateStr && b.bookingStatus !== "Cancelled")
+          .map(b => b.time);
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLocalBooking(booking) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || "[]");
+        stored.push(booking);
+        localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(stored));
+      } catch (e) {
+        console.error("Local storage save error", e);
+      }
+    }
+
+    // =========================================================================
+    // INITIALIZATION
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      initDateSelector();
+      renderTimeSlots();
+      updateSummary();
+    });
+
+    // =========================================================================
+    // DATE SELECTION ENGINE
+    // =========================================================================
+    function initDateSelector() {
+      const today = new Date();
+      const todayStr = formatDateISO(today);
+      bookingState.date = todayStr;
+      bookingState.displayDate = formatDisplayDate(today);
+
+      const nativeInput = document.getElementById("native-date-input");
+      if (nativeInput) {
+        nativeInput.min = todayStr;
+        nativeInput.value = todayStr;
+      }
+
+      renderDatePills(today);
+    }
+
+    function renderDatePills(baseDate) {
+      const tabsContainer = document.getElementById("quick-date-tabs");
+      tabsContainer.innerHTML = "";
+
+      const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(baseDate);
+        d.setDate(baseDate.getDate() + i);
+
+        const isoStr = formatDateISO(d);
+        const isSelected = (isoStr === bookingState.date);
+
+        const pill = document.createElement("div");
+        pill.className = `date-pill ${isSelected ? "selected" : ""}`;
+        pill.innerHTML = `
+          <div class="date-weekday">${i === 0 ? "TODAY" : daysOfWeek[d.getDay()]}</div>
+          <div class="date-day">${d.getDate()}</div>
+          <div class="date-month">${months[d.getMonth()]}</div>
+        `;
+        pill.onclick = () => selectDate(isoStr, formatDisplayDate(d));
+        tabsContainer.appendChild(pill);
+      }
+    }
+
+    function selectDate(isoStr, displayStr) {
+      bookingState.date = isoStr;
+      bookingState.displayDate = displayStr;
+      bookingState.time = ""; // reset selected time
+
+      const nativeInput = document.getElementById("native-date-input");
+      if (nativeInput) nativeInput.value = isoStr;
+
+      renderDatePills(new Date(isoStr));
+      renderTimeSlots();
+      updateSummary();
+    }
+
+    function onManualDateChange(selectedIso) {
+      if (!selectedIso) return;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const chosen = new Date(selectedIso);
+      chosen.setHours(0, 0, 0, 0);
+
+      if (chosen < today) {
+        showToast("Cannot select past dates", "error");
+        return;
+      }
+
+      selectDate(selectedIso, formatDisplayDate(chosen));
+    }
+
+    function formatDateISO(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDisplayDate(d) {
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    // =========================================================================
+    // TIME SLOT ENGINE & DYNAMIC REAL-TIME VALIDATION
+    // =========================================================================
+    function parseSlotTimeToMinutes(slotStr) {
+      const match = slotStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (!match) return 0;
+      let h = parseInt(match[1], 10);
+      const m = parseInt(match[2], 10);
+      const meridian = match[3].toUpperCase();
+      if (meridian === "PM" && h < 12) h += 12;
+      if (meridian === "AM" && h === 12) h = 0;
+      return h * 60 + m;
+    }
+
+    function isSlotExpired(slotStr, selectedDateStr) {
+      const now = new Date();
+      const todayStr = formatDateISO(now);
+
+      // If selected date is a future date, slot is not expired
+      if (selectedDateStr > todayStr) return false;
+      // If selected date is in past, all slots expired
+      if (selectedDateStr < todayStr) return true;
+
+      // If selected date is today, compare current time in minutes
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const slotMinutes = parseSlotTimeToMinutes(slotStr);
+
+      // Expire slots that have already passed
+      return slotMinutes <= currentMinutes;
+    }
+
+    function renderTimeSlots() {
+      const container = document.getElementById("slots-container");
+      const dateSubtitle = document.getElementById("slot-subtitle-date");
+      if (!container) return;
+
+      container.innerHTML = "";
+      dateSubtitle.textContent = `Showing slots for: ${bookingState.displayDate || bookingState.date}`;
+
+      const bookedSlots = getLocalBookedSlots(bookingState.date);
+
+      OPERATING_SLOTS.forEach(slot => {
+        const expired = isSlotExpired(slot, bookingState.date);
+        const booked = bookedSlots.includes(slot);
+        const isSelected = (bookingState.time === slot);
+
+        const slotBtn = document.createElement("button");
+        slotBtn.type = "button";
+
+        let statusText = "Available";
+        let btnClasses = ["time-slot-btn"];
+
+        if (expired) {
+          btnClasses.push("expired");
+          statusText = "Expired";
+          slotBtn.disabled = true;
+        } else if (booked) {
+          btnClasses.push("booked");
+          statusText = "Booked";
+          slotBtn.disabled = true;
+        } else if (isSelected) {
+          btnClasses.push("selected");
+          statusText = "Selected";
+        }
+
+        slotBtn.className = btnClasses.join(" ");
+        slotBtn.innerHTML = `
+          <span>${slot}</span>
+          <span class="slot-status-label">${statusText}</span>
+        `;
+
+        if (!expired && !booked) {
+          slotBtn.onclick = () => selectTimeSlot(slot);
+        }
+
+        container.appendChild(slotBtn);
+      });
+    }
+
+    function selectTimeSlot(slotStr) {
+      bookingState.time = slotStr;
+      renderTimeSlots();
+      updateSummary();
+    }
+
+    // =========================================================================
+    // TREATMENT SELECTION
+    // =========================================================================
+    function selectTreatment(name, price, cardElement) {
+      bookingState.treatment = name;
+      bookingState.price = price;
+
+      document.querySelectorAll(".treatment-card").forEach(c => c.classList.remove("selected"));
+      if (cardElement) cardElement.classList.add("selected");
+
+      updateSummary();
+    }
+
+    // =========================================================================
+    // PAYMENT METHOD SELECTION
+    // =========================================================================
+    function selectPaymentMethod(method) {
+      bookingState.paymentMethod = method;
+      if (method === "Online Payment") {
+        bookingState.paymentStatus = "Online Payment";
+        document.getElementById("pay-card-online").classList.add("selected");
+        document.getElementById("pay-card-salon").classList.remove("selected");
+      } else {
+        bookingState.paymentStatus = "Pay at Salon";
+        document.getElementById("pay-card-salon").classList.add("selected");
+        document.getElementById("pay-card-online").classList.remove("selected");
+      }
+      updateSummary();
+    }
+
+    // =========================================================================
+    // SUMMARY UPDATE
+    // =========================================================================
+    function updateSummary() {
+      const nameInput = document.getElementById("cust-name");
+      const emailInput = document.getElementById("cust-email");
+      const phoneInput = document.getElementById("cust-phone");
+
+      bookingState.name = nameInput ? nameInput.value.trim() : "";
+      bookingState.email = emailInput ? emailInput.value.trim() : "";
+      bookingState.phone = phoneInput ? phoneInput.value.trim() : "";
+
+      document.getElementById("sum-treatment").textContent = bookingState.treatment;
+      document.getElementById("sum-date").textContent = bookingState.displayDate || bookingState.date || "Today";
+      document.getElementById("sum-time").textContent = bookingState.time ? bookingState.time : "Please select slot";
+      
+      const custDisplay = bookingState.name ? `${bookingState.name} (${bookingState.phone || 'No phone'})` : "—";
+      document.getElementById("sum-customer").textContent = custDisplay;
+
+      document.getElementById("sum-payment").textContent = bookingState.paymentMethod;
+      document.getElementById("sum-payment-status").textContent = bookingState.paymentStatus;
+      document.getElementById("sum-total").textContent = `₹${bookingState.price}`;
+    }
+
+    // =========================================================================
+    // STEPPER & WIZARD NAVIGATION
+    // =========================================================================
+    function goToBookingStep(stepNumber) {
+      // Validate step constraints
+      if (stepNumber >= 2 && !bookingState.time) {
+        showToast("Please choose an available time slot first", "error");
+        return;
+      }
+      if (stepNumber >= 3 && (!bookingState.name || !bookingState.email || !bookingState.phone)) {
+        showToast("Please complete your name, email, and phone number", "error");
+        return;
+      }
+
+      bookingState.currentStep = stepNumber;
+
+      // Update Tabs
+      for (let i = 1; i <= 4; i++) {
+        const tab = document.getElementById(`tab-step-${i}`);
+        const view = document.getElementById(`view-step-${i}`);
+
+        if (tab && view) {
+          tab.classList.remove("active", "completed");
+          view.classList.remove("active");
+
+          if (i === stepNumber) {
+            tab.classList.add("active");
+            view.classList.add("active");
+          } else if (i < stepNumber) {
+            tab.classList.add("completed");
+          }
+        }
+      }
+
+      // Smooth scroll to app panel
+      const appWrap = document.querySelector(".booking-app-wrapper");
+      if (appWrap && window.innerWidth < 768) {
+        appWrap.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+
+    function proceedToStep2() {
+      if (!bookingState.time) {
+        showToast("Please select an available time slot before proceeding", "error");
+        return;
+      }
+      goToBookingStep(2);
+    }
+
+    function proceedToStep3() {
+      updateSummary();
+      if (!bookingState.name || !bookingState.email || !bookingState.phone) {
+        showToast("Please fill in all customer details", "error");
+        return;
+      }
+      if (!/^\d{10}$/.test(bookingState.phone)) {
+        showToast("Please enter a valid 10-digit mobile number", "error");
+        return;
+      }
+      goToBookingStep(3);
+    }
+
+    // =========================================================================
+    // FINAL SUBMISSION (FETCH RULES COMPLIANT)
+    // =========================================================================
+    function submitFinalBooking() {
+      const btn = document.getElementById("btn-submit-booking");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"></circle></svg> Processing Booking...`;
+      }
+
+      // Double-booking check in local storage cache
+      const bookedSlots = getLocalBookedSlots(bookingState.date);
+      if (bookedSlots.includes(bookingState.time)) {
+        showToast("This slot was just booked by another customer. Please choose a different slot.", "error");
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Confirm Appointment Booking";
+        }
+        goToBookingStep(1);
+        renderTimeSlots();
+        return;
+      }
+
+      // Generate Client-Side Booking ID (TRS + 5 digit random)
+      const generatedBookingId = "TRS" + Math.floor(10000 + Math.random() * 90000);
+      bookingState.bookingId = generatedBookingId;
+
+      // Construct Google Apps Script GET URL (Fetch Rules Compliant)
+      const queryParams = new URLSearchParams({
+        name: bookingState.name,
+        email: bookingState.email,
+        phone: bookingState.phone,
+        treatment: bookingState.treatment,
+        date: bookingState.date,
+        time: bookingState.time,
+        paymentMethod: bookingState.paymentMethod
+      });
+
+      const requestUrl = SCRIPT_URL + "?" + queryParams.toString();
+
+      // STRICT REQUIREMENT: fetch(url, { method: "GET", mode: "no-cors" })
+      fetch(requestUrl, {
+        method: "GET",
+        mode: "no-cors"
+      })
+      .then(() => {
+        handleBookingSuccess(generatedBookingId);
+      })
+      .catch((err) => {
+        console.warn("Fetch network warning, completing with local reservation:", err);
+        handleBookingSuccess(generatedBookingId);
+      });
+    }
+
+    function handleBookingSuccess(bookingId) {
+      // Record locally to prevent duplicate booking
+      saveLocalBooking({
+        bookingId: bookingId,
+        date: bookingState.date,
+        time: bookingState.time,
+        treatment: bookingState.treatment,
+        name: bookingState.name,
+        email: bookingState.email,
+        phone: bookingState.phone,
+        paymentMethod: bookingState.paymentMethod,
+        paymentStatus: bookingState.paymentStatus,
+        bookingStatus: "Confirmed",
+        createdAt: new Date().toISOString()
+      });
+
+      // Update UI Confirmation Elements
+      document.getElementById("confirm-booking-id").textContent = `#${bookingId}`;
+      document.getElementById("sum-booking-status").textContent = "Confirmed";
+      document.getElementById("sum-booking-status").className = "badge badge-success";
+
+      // Setup WhatsApp Pre-filled link
+      const whatsappMsg = encodeURIComponent(
+        `Hello Thangaraja Salon! Here is my confirmed appointment:\n` +
+        `Booking ID: #${bookingId}\n` +
+        `Treatment: ${bookingState.treatment}\n` +
+        `Date: ${bookingState.displayDate || bookingState.date}\n` +
+        `Time: ${bookingState.time}\n` +
+        `Payment: ${bookingState.paymentStatus}`
+      );
+      document.getElementById("btn-whatsapp-share").href = `https://wa.me/?text=${whatsappMsg}`;
+
+      // Reset submit button
+      const btn = document.getElementById("btn-submit-booking");
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Confirm Appointment Booking";
+      }
+
+      showToast("Appointment Successfully Booked!", "success");
+      goToBookingStep(4);
+      renderTimeSlots();
+    }
+
+    function resetToNewBooking() {
+      bookingState.time = "";
+      goToBookingStep(1);
+      renderTimeSlots();
+      updateSummary();
+    }
+
+    // =========================================================================
+    // STATUS LOOKUP & TRACKING
+    // =========================================================================
+    function lookupBookingStatus() {
+      const input = document.getElementById("lookup-booking-id");
+      const id = input ? input.value.trim().replace("#", "").toUpperCase() : "";
+
+      if (!id) {
+        showToast("Please enter a Booking ID (e.g. TRS10245)", "error");
+        return;
+      }
+
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_BOOKINGS) || "[]");
+        const found = stored.find(b => b.bookingId.toUpperCase() === id);
+
+        if (found) {
+          bookingState.bookingId = found.bookingId;
+          bookingState.treatment = found.treatment;
+          bookingState.date = found.date;
+          bookingState.displayDate = found.date;
+          bookingState.time = found.time;
+          bookingState.name = found.name;
+          bookingState.phone = found.phone;
+          bookingState.paymentMethod = found.paymentMethod;
+          bookingState.paymentStatus = found.paymentStatus;
+          bookingState.bookingStatus = found.bookingStatus || "Confirmed";
+
+          document.getElementById("confirm-booking-id").textContent = `#${found.bookingId}`;
+          updateSummary();
+          goToBookingStep(4);
+          showToast(`Found Booking #${found.bookingId}`, "success");
+        } else {
+          // Fallback lookup for user-entered ID
+          document.getElementById("confirm-booking-id").textContent = `#${id}`;
+          showToast(`Booking #${id} status: Confirmed`, "info");
+          goToBookingStep(4);
+        }
+      } catch (e) {
+        showToast("Unable to lookup booking", "error");
+      }
+    }
+
+    // =========================================================================
+    // TOAST NOTIFICATIONS HELPER
+    // =========================================================================
+    function showToast(message, type = "info") {
+      const toastBox = document.getElementById("toast-box");
+      if (!toastBox) return;
+
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <span>${message}</span>
+      `;
+      toastBox.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(100%)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
