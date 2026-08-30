@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Staff Dashboard | Thangaraja Salon</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Cinzel:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin-body">
+
+  <!-- PASSCODE AUTHENTICATION OVERLAY -->
+  <div class="admin-auth-overlay" id="admin-auth-modal">
+    <div class="admin-auth-card">
+      <div class="admin-auth-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+
+      <h2 style="font-family:var(--font-heading); font-size:1.5rem; font-weight:800; margin-bottom:0.35rem;">
+        Staff Portal Login
+      </h2>
+      <p style="font-size:0.85rem; color:var(--text-secondary);">
+        Enter Salon Staff Passcode to access appointment management.
+      </p>
+
+      <form id="admin-login-form" onsubmit="event.preventDefault();">
+        <div class="pin-input-group">
+          <input type="password" id="admin-pin-input" class="pin-input" placeholder="••••" maxlength="8" autofocus autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%; font-size:0.95rem;" id="btn-admin-login">
+          Unlock Dashboard
+        </button>
+
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:1.25rem;">
+          Default Staff PIN: <code style="color:var(--accent-gold-light);">7788</code>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN NAVBAR -->
+  <header class="admin-navbar">
+    <div class="container">
+      <div class="admin-nav-inner">
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <a href="index.html" class="brand-logo">
+            <div class="logo-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="6" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+              </svg>
+            </div>
+            <div class="logo-text">
+              <span class="logo-title">Thangaraja</span>
+              <span class="logo-subtitle">Staff Portal</span>
+            </div>
+          </a>
+
+          <span class="admin-badge">
+            <span class="live-dot" style="width:6px; height:6px;"></span>
+            Reception Mode
+          </span>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:0.85rem;">
+          <span id="live-clock-display" style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;"></span>
+          <button class="btn btn-secondary btn-sm" id="btn-admin-refresh" title="Refresh Bookings">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Sync
+          </button>
+          <button class="btn btn-secondary btn-sm" id="btn-admin-logout">
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" style="padding-top:1.5rem; padding-bottom:3rem;">
+    <!-- METRICS SUMMARY ROW -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
+        <div>
+          <div class="metric-val" id="metric-total-today">0</div>
+          <div class="metric-label">Today's Bookings</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-wrap" style="background:rgba(16,185,129,0.12); color:#34d399;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div>
+          <div class="metric-val" id="metric-completed-today">0</div>
+          <div class="metric-label">Completed Cuts</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-wrap" style="background:rgba(59,130,246,0.12); color:#60a5fa;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+        </div>
+        <div>
+          <div class="metric-val" id="metric-revenue-today">₹0</div>
+          <div class="metric-label">Estimated Revenue</div>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon-wrap" style="background:rgba(245,158,11,0.12); color:#fbbf24;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div>
+          <div class="metric-val" id="metric-pending-today">0</div>
+          <div class="metric-label">Upcoming / Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD CONTROLS (DATE TABS & SEARCH) -->
+    <div class="dashboard-controls-card">
+      <div class="admin-date-tabs" id="admin-date-filters">
+        <button class="admin-date-btn active" data-date="today">Today</button>
+        <button class="admin-date-btn" data-date="tomorrow">Tomorrow</button>
+        <button class="admin-date-btn" data-date="day3">Day After</button>
+        <button class="admin-date-btn" data-date="all">All Bookings</button>
+        <input type="date" id="admin-custom-date" class="input-date" style="font-size:0.8rem; padding:0.45rem 0.65rem;">
+      </div>
+
+      <div class="admin-search-wrap">
+        <svg class="admin-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="admin-search-input" class="admin-search-input" placeholder="Search by name, phone, or #TRS ID...">
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS TABLE SECTION -->
+    <div class="admin-section-box">
+      <div class="section-box-header">
+        <div>
+          <h3 style="font-family:var(--font-heading); font-size:1.25rem; font-weight:700;">Appointments List</h3>
+          <p style="font-size:0.82rem; color:var(--text-secondary);" id="table-subtitle">Showing all appointments for Today</p>
+        </div>
+        <span class="badge badge-gold" id="appointments-count-badge">0 Bookings</span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Booking ID</th>
+              <th>Customer</th>
+              <th>Treatment</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body">
+            <!-- Populated dynamically via js/admin.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-state-box" id="admin-empty-state" style="display:none;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:0.75rem; color:var(--text-muted);">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <h4 style="font-size:1rem; font-weight:700; color:var(--text-secondary);">No Appointments Found</h4>
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-top:0.25rem;">
+          No reservations match the selected date or search filter.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-box"></div>
+
+  <!-- Admin Application Script -->
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
