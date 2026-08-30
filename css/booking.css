@@ -575,3 +575,87 @@
   color: var(--accent-gold-light);
   letter-spacing: 0.08em;
 }
+
+/* ==========================================================================
+   ARRIVAL & VISIT INSTRUCTIONS CARD
+   ========================================================================== */
+.arrival-instructions-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.instruction-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 1rem;
+}
+
+.instruction-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--accent-gold-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.instruction-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.instruction-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.instruction-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.instruction-item strong {
+  color: var(--text-primary);
+}
+
+.instruction-item.highlight-arrival {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.85rem;
+  color: #fef08a;
+}
+
+.instruction-item.highlight-arrival strong {
+  color: var(--accent-gold-light);
+}
+
+.bullet-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+

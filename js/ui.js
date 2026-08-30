@@ -372,7 +372,8 @@ export function displayBookingConfirmation(bookingId) {
       `Date: ${bookingState.displayDate || bookingState.date}\n` +
       `Time: ${bookingState.time}\n` +
       `Total: ₹${bookingState.price}\n` +
-      `Payment: ${bookingState.paymentStatus}`
+      `Payment: ${bookingState.paymentStatus}\n\n` +
+      `⏰ Note: Please arrive 10 minutes early at the salon.`
     );
     elWhatsAppBtn.href = `https://wa.me/?text=${msg}`;
   }
