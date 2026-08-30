@@ -131,6 +131,8 @@ export function setPayment(method) {
     : "Pay at Salon";
 }
 
+export const selectPayment = setPayment;
+
 export function resetBookingState() {
   bookingState.time = "";
   bookingState.currentStep = 1;

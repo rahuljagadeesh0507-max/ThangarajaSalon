@@ -1,6 +1,6 @@
 /**
  * Thangaraja Salon - Application Bootstrap & Event Controller
- * (Minimalist Shop-Based Architecture)
+ * (Robust Lifecycle & Minimalist Shop-Based Architecture)
  */
 
 import { CONFIG, SERVICES } from './config.js';
@@ -30,16 +30,24 @@ import {
 } from './ui.js';
 
 /**
- * Initializes the salon application on DOM load.
+ * Initializes the salon application immediately or on DOM ready.
  */
-document.addEventListener("DOMContentLoaded", () => {
+function boot() {
   initApp();
   bindEvents();
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", boot);
+} else {
+  boot();
+}
 
 async function initApp() {
-  let targetDate = new Date();
-  // If today is Tuesday, default to Wednesday
+  const today = new Date();
+  let targetDate = new Date(today);
+
+  // If today is Tuesday (closed), advance to Wednesday
   if (targetDate.getDay() === 2) {
     targetDate.setDate(targetDate.getDate() + 1);
   }
@@ -51,20 +59,45 @@ async function initApp() {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const displayStr = `${targetDate.getDate()} ${months[targetDate.getMonth()]} ${targetDate.getFullYear()}`;
 
+  // Initialize booking date to today
   bookingState.date = isoStr;
-  bookingState.displayDate = displayStr;
+  bookingState.displayDate = (targetDate.getDay() === today.getDay()) ? "Today" : displayStr;
 
+  // Sync native date input bounds and value
+  const nativeInput = document.getElementById("native-date-input");
+  if (nativeInput) {
+    const tYear = today.getFullYear();
+    const tMonth = String(today.getMonth() + 1).padStart(2, '0');
+    const tDay = String(today.getDate()).padStart(2, '0');
+    nativeInput.min = `${tYear}-${tMonth}-${tDay}`;
+
+    const maxDay = new Date(today);
+    maxDay.setDate(today.getDate() + (CONFIG.MAX_BOOKING_DAYS_AHEAD - 1));
+    const mYear = maxDay.getFullYear();
+    const mMonth = String(maxDay.getMonth() + 1).padStart(2, '0');
+    const mDay = String(maxDay.getDate()).padStart(2, '0');
+    nativeInput.max = `${mYear}-${mMonth}-${mDay}`;
+
+    nativeInput.value = isoStr;
+  }
+
+  // Render UI elements
   renderTreatments();
-  renderDatePills(new Date());
+  renderDatePills(today);
   renderTimeSlots();
   updateSummary();
 
-  await fetchServerBookedSlots(isoStr);
-  renderTimeSlots();
+  // Sync real-time booked appointments from server
+  try {
+    await fetchServerBookedSlots(isoStr);
+    renderTimeSlots();
+  } catch (e) {
+    console.warn("Could not load server slots:", e);
+  }
 }
 
 function bindEvents() {
-  // Navigation tabs
+  // Navigation stepper tabs
   for (let i = 1; i <= 4; i++) {
     const tab = document.getElementById(`tab-step-${i}`);
     if (tab) {
@@ -161,7 +194,7 @@ function bindEvents() {
     }
   });
 
-  // Manual Date Input
+  // Manual Date Input change handler
   const nativeDateInput = document.getElementById("native-date-input");
   if (nativeDateInput) {
     nativeDateInput.addEventListener("change", (e) => onManualDateChange(e.target.value));
@@ -288,7 +321,7 @@ async function handleTrackStatusLookup() {
   showToast(`Booking #${id} was not found. Please verify your Booking ID.`, "error");
 }
 
-// Expose required globals
+// Expose globals for external calls
 window.goToBookingStep = goToBookingStep;
 window.onManualDateChange = onManualDateChange;
 window.promptCancelBooking = promptCancelBooking;

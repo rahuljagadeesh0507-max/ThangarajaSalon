@@ -5,7 +5,7 @@
 import { CONFIG } from './config.js';
 import { setServerBookedList, cancelLocalBooking } from './state.js';
 
-export const IS_HTTP_HOSTED = window.location.protocol.startsWith("http");
+export const IS_HTTP_HOSTED = typeof window !== "undefined" && window.location.protocol.startsWith("http");
 
 /**
  * Fetches booked slots/appointments for a given date.

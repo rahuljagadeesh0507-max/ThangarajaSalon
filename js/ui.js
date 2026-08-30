@@ -112,6 +112,9 @@ export function renderDatePills(baseDate = new Date()) {
   if (nativeInput) {
     nativeInput.min = minIsoStr;
     nativeInput.max = maxIsoStr;
+    if (bookingState.date) {
+      nativeInput.value = bookingState.date;
+    }
   }
 
   // Generate strictly 3 rolling days
