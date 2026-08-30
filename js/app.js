@@ -219,12 +219,41 @@ async function handleFinalSubmit() {
   const btn = document.getElementById("btn-submit-booking");
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"></circle></svg> Processing Booking...`;
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin"><circle cx="12" cy="12" r="10"></circle></svg> Confirming Booking...`;
   }
 
   const generatedBookingId = "TRS" + Math.floor(10000 + Math.random() * 90000);
   bookingState.bookingId = generatedBookingId;
 
+  const bookingRecord = {
+    bookingId: generatedBookingId,
+    date: bookingState.date,
+    time: bookingState.time,
+    treatment: bookingState.treatment,
+    durationMins: bookingState.durationMins,
+    price: bookingState.price,
+    name: bookingState.name,
+    email: bookingState.email,
+    phone: bookingState.phone,
+    paymentMethod: bookingState.paymentMethod,
+    paymentStatus: bookingState.paymentStatus,
+    bookingStatus: "Confirmed",
+    createdAt: new Date().toISOString()
+  };
+
+  // 1. Instantly save to local storage
+  saveConfirmedBooking(bookingRecord);
+
+  // 2. Instantly transition to Step 4 Confirmation Receipt (0ms delay)
+  displayBookingConfirmation(generatedBookingId);
+  showToast("Appointment Successfully Reserved!", "success");
+
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = "Confirm Appointment Booking";
+  }
+
+  // 3. Asynchronously sync to backend in background
   const bookingPayload = {
     action: "book",
     bookingId: generatedBookingId,
@@ -240,46 +269,15 @@ async function handleFinalSubmit() {
     paymentStatus: bookingState.paymentStatus
   };
 
-  try {
-    await submitBooking(bookingPayload);
-
-    saveConfirmedBooking({
-      bookingId: generatedBookingId,
-      date: bookingState.date,
-      time: bookingState.time,
-      treatment: bookingState.treatment,
-      durationMins: bookingState.durationMins,
-      price: bookingState.price,
-      name: bookingState.name,
-      email: bookingState.email,
-      phone: bookingState.phone,
-      paymentMethod: bookingState.paymentMethod,
-      paymentStatus: bookingState.paymentStatus,
-      bookingStatus: "Confirmed",
-      createdAt: new Date().toISOString()
+  submitBooking(bookingPayload)
+    .then(() => fetchServerBookedSlots(bookingState.date))
+    .then(() => renderTimeSlots())
+    .catch(err => {
+      console.warn("Background sync note:", err);
+      if (err.message === "SLOT_TAKEN") {
+        showToast("Notice: This slot had a recent conflict. Our salon team will contact you if adjustment is needed.", "warning");
+      }
     });
-
-    displayBookingConfirmation(generatedBookingId);
-    showToast("Appointment Successfully Booked!", "success");
-    await fetchServerBookedSlots(bookingState.date);
-    renderTimeSlots();
-  } catch (err) {
-    if (err.message === "SLOT_TAKEN") {
-      showToast("This slot or one of its required duration intervals is already taken. Please choose another time slot.", "error");
-      goToBookingStep(1);
-      await fetchServerBookedSlots(bookingState.date);
-      renderTimeSlots();
-    } else if (err.message === "RATE_LIMITED") {
-      showToast("Too many booking attempts. Please wait a minute and retry.", "error");
-    } else {
-      showToast(err.message || "Failed to submit booking. Please try again.", "error");
-    }
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Confirm Appointment Booking";
-    }
-  }
 }
 
 async function handleTrackStatusLookup() {
