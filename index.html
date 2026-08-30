@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Thangaraja Salon | Skip the Queue. Book Your Time. Get Your Cut.</title>
-  <meta name="description" content="Online appointment and time-slot booking system for Thangaraja Salon. Skip the queue, pick your treatment, reserve your slot from 8:00 AM to 10:00 PM.">
+  <meta name="description" content="Online appointment and time-slot booking system for Thangaraja Salon. Skip the queue, pick your treatment, reserve your slot from 8:00 AM to 9:30 PM (Closed Tuesdays, Break: 1:30 PM - 3:00 PM).">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -763,14 +763,21 @@
     }
 
     /* ==========================================================================
-       TREATMENT CARDS (EXACT 3 ONLY - FULLY RESPONSIVE)
+       TREATMENT CARDS (FULL SERVICE MENU - RESPONSIVE GRID)
        ========================================================================== */
     .treatments-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
       width: 100%;
       box-sizing: border-box;
+    }
+
+    @media (max-width: 680px) {
+      .treatments-grid {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
     }
 
     .treatment-card {
@@ -2004,7 +2011,7 @@
   <!-- Top Announcement Bar -->
   <div class="top-announcement">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-    <span>Operating Hours: <strong>8:00 AM – 10:00 PM Daily</strong> • Zero Wait Time with Online Booking</span>
+    <span>Operating Hours: <strong>8:00 AM – 9:30 PM</strong> (Break: 1:30 PM – 3:00 PM) • <strong>Tuesday: Closed (Weekly Holiday)</strong></span>
   </div>
 
   <!-- Header / Navigation -->
@@ -2084,8 +2091,8 @@
               <span class="stat-label">Queue Wait</span>
             </div>
             <div class="hero-stat-item">
-              <span class="stat-number">8AM-10PM</span>
-              <span class="stat-label">Daily Slots</span>
+              <span class="stat-number">8AM-9:30PM</span>
+              <span class="stat-label">Wed – Mon Slots</span>
             </div>
             <div class="hero-stat-item">
               <span class="stat-number">100%</span>
@@ -2160,7 +2167,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line></svg>
           </div>
           <h3 class="step-title">1. Pick Treatment</h3>
-          <p class="step-desc">Choose from our 3 curated services: Basic Hair Cut, Hair Cut + Trim, or Shaving.</p>
+          <p class="step-desc">Choose from our full service menu: Hair Cut, Trim, Shaving, Detan, Bleach, Facial, Hair Spa, Straightening, Smoothing, or Curling.</p>
         </div>
 
         <div class="step-card">
@@ -2169,7 +2176,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
           <h3 class="step-title">2. Choose Time Slot</h3>
-          <p class="step-desc">Select today or a future date and pick an available 30-minute window between 8 AM & 10 PM.</p>
+          <p class="step-desc">Select any available date (Wed-Mon) and reserve your 30-min window between 8:00 AM and 9:30 PM (Break: 1:30 PM – 3:00 PM).</p>
         </div>
 
         <div class="step-card">
@@ -2236,22 +2243,22 @@
                 <p class="panel-desc">Choose one of our signature grooming services</p>
               </div>
 
-              <!-- EXACT 3 TREATMENTS -->
+              <!-- 11 SALON TREATMENTS -->
               <div class="treatments-grid">
-                <!-- Treatment 1 -->
-                <div class="treatment-card selected" onclick="selectTreatment('Basic Hair Cut', 150, this)">
+                <!-- 1. Hair Cut -->
+                <div class="treatment-card selected" onclick="selectTreatment('Hair Cut', 130, this)">
                   <div class="treatment-info">
                     <div class="treatment-icon">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line></svg>
                     </div>
                     <div>
-                      <h4 class="treatment-name">Basic Hair Cut</h4>
+                      <h4 class="treatment-name">Hair Cut</h4>
                       <p class="treatment-meta">Classic precision haircut & styling finish • 30 mins</p>
                     </div>
                   </div>
                   <div class="treatment-right">
                     <div class="treatment-price-wrap">
-                      <span class="treatment-price">₹150</span>
+                      <span class="treatment-price">₹130</span>
                     </div>
                     <div class="select-radio">
                       <span class="select-radio-inner"></span>
@@ -2259,20 +2266,20 @@
                   </div>
                 </div>
 
-                <!-- Treatment 2 -->
-                <div class="treatment-card" onclick="selectTreatment('Hair Cut + Trim', 250, this)">
+                <!-- 2. Trim -->
+                <div class="treatment-card" onclick="selectTreatment('Trim', 80, this)">
                   <div class="treatment-info">
                     <div class="treatment-icon">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                     <div>
-                      <h4 class="treatment-name">Hair Cut + Trim</h4>
-                      <p class="treatment-meta">Full haircut + beard grooming & edge line shaping • 45 mins</p>
+                      <h4 class="treatment-name">Trim</h4>
+                      <p class="treatment-meta">Quick hair or beard trimming & sharp lines • 30 mins</p>
                     </div>
                   </div>
                   <div class="treatment-right">
                     <div class="treatment-price-wrap">
-                      <span class="treatment-price">₹250</span>
+                      <span class="treatment-price">₹80</span>
                     </div>
                     <div class="select-radio">
                       <span class="select-radio-inner"></span>
@@ -2280,20 +2287,188 @@
                   </div>
                 </div>
 
-                <!-- Treatment 3 -->
-                <div class="treatment-card" onclick="selectTreatment('Shaving', 100, this)">
+                <!-- 3. Shaving -->
+                <div class="treatment-card" onclick="selectTreatment('Shaving', 60, this)">
                   <div class="treatment-info">
                     <div class="treatment-icon">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                     </div>
                     <div>
                       <h4 class="treatment-name">Shaving</h4>
-                      <p class="treatment-meta">Traditional hot towel razor shave & soothing balm • 20 mins</p>
+                      <p class="treatment-meta">Traditional hot towel razor shave & soothing balm • 30 mins</p>
                     </div>
                   </div>
                   <div class="treatment-right">
                     <div class="treatment-price-wrap">
-                      <span class="treatment-price">₹100</span>
+                      <span class="treatment-price">₹60</span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Normal Hair Cut + Shaving -->
+                <div class="treatment-card" onclick="selectTreatment('Normal Hair Cut + Shaving', 200, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><path d="M16 16l4 4"></path></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Normal Hair Cut + Shaving</h4>
+                      <p class="treatment-meta">Precision haircut paired with fresh clean shave • 30 mins</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹200</span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 5. Detan -->
+                <div class="treatment-card" onclick="selectTreatment('Detan', 200, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Detan</h4>
+                      <p class="treatment-meta">Skin tan removal, deep cleanse & instant glow • 30 mins</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹200</span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 6. Bleach -->
+                <div class="treatment-card" onclick="selectTreatment('Bleach', 200, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Bleach</h4>
+                      <p class="treatment-meta">Facial brightening & skin lightening treatment • 30 mins</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹200</span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 7. Facial -->
+                <div class="treatment-card" onclick="selectTreatment('Facial', 350, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Facial</h4>
+                      <p class="treatment-meta">Rejuvenating cleansing, exfoliation & glow • 45 mins - 1 hr</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹350 <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-body);">onwards</span></span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 8. Hair Spa -->
+                <div class="treatment-card" onclick="selectTreatment('Hair Spa', 400, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Hair Spa</h4>
+                      <p class="treatment-meta">Deep conditioning, steam therapy & scalp massage • 1.5 hrs</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹400 <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-body);">onwards</span></span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 9. Straightening -->
+                <div class="treatment-card" onclick="selectTreatment('Straightening', 700, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="2" x2="8" y2="22"></line><line x1="12" y1="2" x2="12" y2="22"></line><line x1="16" y1="2" x2="16" y2="22"></line></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Straightening</h4>
+                      <p class="treatment-meta">Permanent sleek, ultra-straight hair transformation • 2 hrs</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹700 <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-body);">onwards</span></span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 10. Smoothing -->
+                <div class="treatment-card" onclick="selectTreatment('Smoothing', 800, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 6h20M2 18h20"></path></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Smoothing</h4>
+                      <p class="treatment-meta">Frizz-free silky smooth keratin texture treatment • 1.5 hrs</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹800 <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-body);">onwards</span></span>
+                    </div>
+                    <div class="select-radio">
+                      <span class="select-radio-inner"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 11. Curling -->
+                <div class="treatment-card" onclick="selectTreatment('Curling', 800, this)">
+                  <div class="treatment-info">
+                    <div class="treatment-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 6.36 15.36L12 21"></path><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-3.54 4.78"></path></svg>
+                    </div>
+                    <div>
+                      <h4 class="treatment-name">Curling</h4>
+                      <p class="treatment-meta">Professional volume bounce & defined wave curling • 2.5 hrs</p>
+                    </div>
+                  </div>
+                  <div class="treatment-right">
+                    <div class="treatment-price-wrap">
+                      <span class="treatment-price">₹800 <span style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-body);">onwards</span></span>
                     </div>
                     <div class="select-radio">
                       <span class="select-radio-inner"></span>
@@ -2306,7 +2481,7 @@
               <div class="date-selection-box" style="margin-top:2.5rem;">
                 <div class="panel-header" style="margin-bottom:1rem;">
                   <h3 class="panel-title" style="font-size:1.35rem;">Select Appointment Date</h3>
-                  <p class="panel-desc">Select today or an upcoming day (Past dates are disabled)</p>
+                  <p class="panel-desc">Select today or an upcoming day (Closed on Tuesdays)</p>
                 </div>
 
                 <div class="date-tabs-row" id="quick-date-tabs">
@@ -2319,12 +2494,12 @@
                 </div>
               </div>
 
-              <!-- Time Slot Grid System (8:00 AM - 10:00 PM) -->
+              <!-- Time Slot Grid System (8:00 AM - 9:30 PM, Break 1:30 PM - 3:00 PM) -->
               <div class="time-slots-section" style="margin-top:2rem;">
                 <div class="panel-header" style="margin-bottom:0.5rem;">
                   <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
                     <h3 class="panel-title" style="font-size:1.35rem;">Available Time Slots</h3>
-                    <span id="operating-hours-badge" class="badge badge-gold">8:00 AM – 10:00 PM</span>
+                    <span id="operating-hours-badge" class="badge badge-gold">8:00 AM – 9:30 PM (Break 1:30–3 PM • Tue Closed)</span>
                   </div>
                   <p class="panel-desc" id="slot-subtitle-date">Showing slots for Today</p>
                 </div>
@@ -2527,7 +2702,7 @@
               <div class="summary-details-list">
                 <div class="summary-row">
                   <span class="summary-label">Treatment</span>
-                  <span class="summary-val" id="sum-treatment">Basic Hair Cut</span>
+                  <span class="summary-val" id="sum-treatment">Hair Cut</span>
                 </div>
 
                 <div class="summary-row">
@@ -2569,7 +2744,7 @@
               <div class="summary-total-box">
                 <div class="total-row">
                   <span class="total-label">Total Payable:</span>
-                  <span class="total-amount" id="sum-total">₹150</span>
+                  <span class="total-amount" id="sum-total">₹130</span>
                 </div>
               </div>
             </div>
@@ -2642,7 +2817,7 @@
           </div>
           <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:0.75rem;">Honest Transparent Prices</h3>
           <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6;">
-            No hidden extras or surprise charges. Basic Hair Cut is ₹150, Trim combo is ₹250, and Shaving is ₹100.
+            No hidden extras or surprise charges. Transparent pricing across all haircut, trimming, facial, and hair treatments.
           </p>
         </div>
       </div>
@@ -2681,9 +2856,12 @@
         <div>
           <h4 class="footer-heading">Services</h4>
           <ul class="footer-links">
-            <li><a href="#booking-app" class="footer-link">Basic Hair Cut (₹150)</a></li>
-            <li><a href="#booking-app" class="footer-link">Hair Cut + Trim (₹250)</a></li>
-            <li><a href="#booking-app" class="footer-link">Traditional Shaving (₹100)</a></li>
+            <li><a href="#booking-app" class="footer-link">Hair Cut (₹130)</a></li>
+            <li><a href="#booking-app" class="footer-link">Normal Hair Cut + Shaving (₹200)</a></li>
+            <li><a href="#booking-app" class="footer-link">Detan / Bleach (₹200)</a></li>
+            <li><a href="#booking-app" class="footer-link">Facial (₹350+)</a></li>
+            <li><a href="#booking-app" class="footer-link">Hair Spa (₹400+)</a></li>
+            <li><a href="#booking-app" class="footer-link">Straightening / Smoothing (₹700+)</a></li>
           </ul>
         </div>
 
@@ -2691,7 +2869,9 @@
           <h4 class="footer-heading">Hours & Location</h4>
           <p style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:0.5rem;">
             <strong style="color:#fff;">Operating Hours:</strong><br>
-            Monday – Sunday: 8:00 AM – 10:00 PM
+            Wed – Mon: 8:00 AM – 9:30 PM<br>
+            <span style="font-size:0.8rem; color:var(--accent-gold-light);">(Break: 1:30 PM – 3:00 PM)</span><br>
+            <span style="color:var(--error); font-weight:600;">Tuesday: Closed (Weekly Holiday)</span>
           </p>
           <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.75rem;">
             Main Street Salon Plaza • Near City Center
@@ -2714,7 +2894,7 @@
        ========================================================================= -->
   <script>
     // =========================================================================
-    // CONFIGURATION & CONSTANTS (Phase 2 Production API Proxy Architecture)
+    // CONFIGURATION & CONSTANTS (Updated Service Menu & Schedule)
     // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqF35_WZsrH5-bVPYWaPYP20DklEfmxLd8uc78BYtOS4UAFtjUrHE0nqFMLoIeB06W2Q/exec";
     const CASHFREE_PAYMENT_URL = "https://payments.cashfree.com/forms/getaudit";
@@ -2722,10 +2902,10 @@
     // Auto-detect whether served via Web/Vercel or local file:/// preview
     const IS_HTTP_HOSTED = window.location.protocol.startsWith("http");
 
-    // Booking State Model
+    // Booking State Model (Default: Hair Cut @ ₹130)
     const bookingState = {
-      treatment: "Basic Hair Cut",
-      price: 150,
+      treatment: "Hair Cut",
+      price: 130,
       date: "",           // YYYY-MM-DD
       displayDate: "",    // e.g. 28 Aug 2026
       time: "",           // e.g. 9:30 AM
@@ -2739,16 +2919,16 @@
       currentStep: 1
     };
 
-    // Slot Generation Config (8:00 AM to 10:00 PM in 30-min increments)
+    // Operating Slots: 8:00 AM to 9:30 PM (Break: 1:30 PM to 3:00 PM, Last Appointment: 9:30 PM)
     const OPERATING_SLOTS = [
       "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
       "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-      "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM",
-      "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM",
-      "04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM",
-      "06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM",
-      "08:00 PM", "08:30 PM", "09:00 PM", "09:30 PM",
-      "10:00 PM"
+      "12:00 PM", "12:30 PM", "01:00 PM",
+      // Afternoon Break: 01:30 PM - 03:00 PM
+      "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM",
+      "05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM",
+      "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM",
+      "09:00 PM", "09:30 PM"
     ];
 
     // Local Storage Booked Slots Cache
@@ -2786,22 +2966,27 @@
     });
 
     // =========================================================================
-    // DATE SELECTION ENGINE & REAL-TIME SERVER SYNC
+    // DATE SELECTION ENGINE (TUESDAY CLOSED / HOLIDAY AWARE)
     // =========================================================================
     function initDateSelector() {
-      const today = new Date();
-      const todayStr = formatDateISO(today);
-      bookingState.date = todayStr;
-      bookingState.displayDate = formatDisplayDate(today);
+      let targetDate = new Date();
+      // If today is Tuesday (Day 2), default to tomorrow (Wednesday)
+      if (targetDate.getDay() === 2) {
+        targetDate.setDate(targetDate.getDate() + 1);
+      }
+
+      const dateStr = formatDateISO(targetDate);
+      bookingState.date = dateStr;
+      bookingState.displayDate = formatDisplayDate(targetDate);
 
       const nativeInput = document.getElementById("native-date-input");
       if (nativeInput) {
-        nativeInput.min = todayStr;
-        nativeInput.value = todayStr;
+        nativeInput.min = formatDateISO(new Date());
+        nativeInput.value = dateStr;
       }
 
-      renderDatePills(today);
-      fetchServerBookedSlots(todayStr);
+      renderDatePills(new Date());
+      fetchServerBookedSlots(dateStr);
     }
 
     async function fetchServerBookedSlots(dateStr) {
@@ -2835,33 +3020,56 @@
         d.setDate(baseDate.getDate() + i);
 
         const isoStr = formatDateISO(d);
+        const isTuesday = (d.getDay() === 2);
         const isSelected = (isoStr === bookingState.date);
 
         const pill = document.createElement("div");
-        pill.className = `date-pill ${isSelected ? "selected" : ""}`;
-        
-        const weekdayDiv = document.createElement("div");
-        weekdayDiv.className = "date-weekday";
-        weekdayDiv.textContent = (i === 0 ? "TODAY" : daysOfWeek[d.getDay()]);
 
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "date-day";
-        dayDiv.textContent = d.getDate();
+        if (isTuesday) {
+          pill.className = "date-pill holiday-pill";
+          pill.style.opacity = "0.5";
+          pill.style.cursor = "not-allowed";
+          pill.style.borderColor = "rgba(239, 68, 68, 0.35)";
+          pill.style.background = "rgba(239, 68, 68, 0.08)";
+          pill.innerHTML = `
+            <div class="date-weekday" style="color:var(--error); font-weight:700;">TUE</div>
+            <div class="date-day" style="color:var(--text-muted);">${d.getDate()}</div>
+            <div class="date-month" style="color:var(--error); font-size:0.65rem; font-weight:800;">CLOSED</div>
+          `;
+          pill.onclick = () => showToast("Tuesday is our weekly holiday (Closed). Please select another day.", "warning");
+        } else {
+          pill.className = `date-pill ${isSelected ? "selected" : ""}`;
+          
+          const weekdayDiv = document.createElement("div");
+          weekdayDiv.className = "date-weekday";
+          weekdayDiv.textContent = (i === 0 ? "TODAY" : daysOfWeek[d.getDay()]);
 
-        const monthDiv = document.createElement("div");
-        monthDiv.className = "date-month";
-        monthDiv.textContent = months[d.getMonth()];
+          const dayDiv = document.createElement("div");
+          dayDiv.className = "date-day";
+          dayDiv.textContent = d.getDate();
 
-        pill.appendChild(weekdayDiv);
-        pill.appendChild(dayDiv);
-        pill.appendChild(monthDiv);
+          const monthDiv = document.createElement("div");
+          monthDiv.className = "date-month";
+          monthDiv.textContent = months[d.getMonth()];
 
-        pill.onclick = () => selectDate(isoStr, formatDisplayDate(d));
+          pill.appendChild(weekdayDiv);
+          pill.appendChild(dayDiv);
+          pill.appendChild(monthDiv);
+
+          pill.onclick = () => selectDate(isoStr, formatDisplayDate(d));
+        }
+
         tabsContainer.appendChild(pill);
       }
     }
 
     function selectDate(isoStr, displayStr) {
+      const chosen = new Date(isoStr);
+      if (chosen.getDay() === 2) {
+        showToast("Tuesday is our weekly holiday (Closed). Please select another day.", "warning");
+        return;
+      }
+
       bookingState.date = isoStr;
       bookingState.displayDate = displayStr;
       bookingState.time = ""; // reset selected time
@@ -2870,7 +3078,7 @@
       const nativeInput = document.getElementById("native-date-input");
       if (nativeInput) nativeInput.value = isoStr;
 
-      renderDatePills(new Date(isoStr));
+      renderDatePills(new Date());
       renderTimeSlots();
       updateSummary();
 
@@ -2886,6 +3094,13 @@
 
       if (chosen < today) {
         showToast("Cannot select past dates", "error");
+        return;
+      }
+
+      if (chosen.getDay() === 2) {
+        showToast("Tuesday is our weekly holiday (Closed). Please choose any day from Wednesday to Monday.", "warning");
+        const nativeInput = document.getElementById("native-date-input");
+        if (nativeInput) nativeInput.value = bookingState.date;
         return;
       }
 
@@ -2937,6 +3152,19 @@
 
       container.innerHTML = "";
       dateSubtitle.textContent = `Showing slots for: ${bookingState.displayDate || bookingState.date}`;
+
+      // Check if selected date is Tuesday
+      const selectedDateObj = new Date(bookingState.date);
+      if (selectedDateObj.getDay() === 2) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem 1rem; background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.35); border-radius: var(--radius-md);">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔒</div>
+            <h4 style="color: #fca5a5; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.25rem;">Salon Closed on Tuesdays</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Tuesday is our scheduled weekly holiday. Please choose any other day (Wednesday to Monday).</p>
+          </div>
+        `;
+        return;
+      }
 
       const localBooked = getLocalBookedSlots(bookingState.date);
       const allBooked = Array.from(new Set([...localBooked, ...serverBookedSlots]));
@@ -3049,6 +3277,10 @@
     // STEPPER & WIZARD NAVIGATION
     // =========================================================================
     function goToBookingStep(stepNumber) {
+      if (new Date(bookingState.date).getDay() === 2) {
+        showToast("Cannot book on Tuesdays (Weekly Holiday). Please select another date.", "warning");
+        return;
+      }
       if (stepNumber >= 2 && !bookingState.time) {
         showToast("Please choose an available time slot first", "error");
         return;
@@ -3349,3 +3581,4 @@
   </script>
 </body>
 </html>
+

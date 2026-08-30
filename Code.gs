@@ -138,8 +138,8 @@ function saveBooking_(params) {
   const name = sanitizeSpreadsheetInput_(params.name);
   const email = sanitizeSpreadsheetInput_(params.email);
   const phone = sanitizeSpreadsheetInput_(params.phone);
-  const treatment = sanitizeSpreadsheetInput_(params.treatment || "Basic Hair Cut");
-  const price = sanitizeSpreadsheetInput_(params.price || "150");
+  const treatment = sanitizeSpreadsheetInput_(params.treatment || "Hair Cut");
+  const price = sanitizeSpreadsheetInput_(params.price || "130");
   const date = sanitizeSpreadsheetInput_(params.date);
   const time = sanitizeSpreadsheetInput_(params.time);
   const paymentMethod = sanitizeSpreadsheetInput_(params.paymentMethod || "Online Payment");
