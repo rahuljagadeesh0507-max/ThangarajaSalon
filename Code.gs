@@ -54,17 +54,30 @@ function sanitizeSpreadsheetInput_(val) {
   return str;
 }
 
+function formatCellString_(val, isDate = false) {
+  if (val instanceof Date) {
+    if (isDate) {
+      return Utilities.formatDate(val, "Asia/Kolkata", "yyyy-MM-dd");
+    }
+    return Utilities.formatDate(val, "Asia/Kolkata", "hh:mm a");
+  }
+  return String(val || "").trim();
+}
+
 function isSlotAvailable_(sheet, dateStr, timeStr) {
   const data = sheet.getDataRange().getValues();
   if (data.length <= 1) return true;
 
+  const targetDate = String(dateStr || "").trim();
+  const targetTime = String(timeStr || "").trim().toUpperCase();
+
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
-    const rowDate = String(row[7] || "").trim();
-    const rowTime = String(row[8] || "").trim();
+    const rowDate = formatCellString_(row[7], true);
+    const rowTime = formatCellString_(row[8], false).toUpperCase();
     const rowStatus = String(row[11] || "").trim().toLowerCase();
 
-    if (rowDate === dateStr && rowTime === timeStr && rowStatus !== "cancelled") {
+    if (rowDate === targetDate && rowTime === targetTime && rowStatus !== "cancelled") {
       return false; // Slot already taken
     }
   }
@@ -76,13 +89,15 @@ function getBookedSlotsForDate_(sheet, dateStr) {
   const booked = [];
   if (data.length <= 1) return booked;
 
+  const targetDate = String(dateStr || "").trim();
+
   for (let i = 1; i < data.length; i++) {
     const row = data[i];
-    const rowDate = String(row[7] || "").trim();
-    const rowTime = String(row[8] || "").trim();
+    const rowDate = formatCellString_(row[7], true);
+    const rowTime = formatCellString_(row[8], false);
     const rowStatus = String(row[11] || "").trim().toLowerCase();
 
-    if (rowDate === dateStr && rowStatus !== "cancelled" && rowTime) {
+    if (rowDate === targetDate && rowStatus !== "cancelled" && rowTime) {
       booked.push(rowTime);
     }
   }
