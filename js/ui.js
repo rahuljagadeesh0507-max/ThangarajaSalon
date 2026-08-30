@@ -1,13 +1,13 @@
 /**
  * Thangaraja Salon - UI Rendering & View Controller
+ * (Minimal Luxury Shop-Based Aesthetic)
  */
 
-import { CONFIG, SERVICES, STYLISTS, OPERATING_SLOTS } from './config.js';
+import { CONFIG, SERVICES, OPERATING_SLOTS } from './config.js';
 import { getSlotAvailabilityStatus, parseTimeToMinutes, getTreatmentDuration } from './duration.js';
 import {
   bookingState,
   selectTreatment as stateSelectTreatment,
-  selectStylist as stateSelectStylist,
   selectDate as stateSelectDate,
   selectTime as stateSelectTime,
   setCustomer,
@@ -73,7 +73,7 @@ export function onTreatmentCardClick(name, price, cardElement) {
 
   if (result.slotInvalidated) {
     showToast(
-      `Selected time (${result.previousTime}) was cleared because ${name} requires ${result.newDurationLabel} and would overlap with break or closing time.`,
+      `Selected time (${result.previousTime}) was cleared because ${name} requires ${result.newDurationLabel} and overlaps break or closing time.`,
       "warning"
     );
   }
@@ -83,43 +83,7 @@ export function onTreatmentCardClick(name, price, cardElement) {
 }
 
 /**
- * Renders Stylist Selection cards.
- */
-export function renderStylists() {
-  const container = document.getElementById("stylists-container");
-  if (!container) return;
-  container.innerHTML = "";
-
-  STYLISTS.forEach(stylist => {
-    const isSelected = (bookingState.stylist === stylist.name);
-    const card = document.createElement("div");
-    card.className = `stylist-card ${isSelected ? "selected" : ""}`;
-    card.innerHTML = `
-      <div class="stylist-avatar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      </div>
-      <div class="stylist-info">
-        <h5 class="stylist-name">${stylist.name}</h5>
-        <p class="stylist-desc">${stylist.desc}</p>
-      </div>
-      <div class="select-radio">
-        <span class="select-radio-inner"></span>
-      </div>
-    `;
-
-    card.onclick = () => {
-      stateSelectStylist(stylist.name);
-      document.querySelectorAll(".stylist-card").forEach(c => c.classList.remove("selected"));
-      card.classList.add("selected");
-      updateSummary();
-    };
-
-    container.appendChild(card);
-  });
-}
-
-/**
- * Renders EXACTLY 3 date selector pills (Today, Tomorrow, Day After Tomorrow).
+ * Renders EXACTLY 3 rolling date selector cards (Today, Tomorrow, Day 3).
  */
 export function renderDatePills(baseDate = new Date()) {
   const tabsContainer = document.getElementById("quick-date-tabs");
@@ -354,7 +318,6 @@ export function updateSummary() {
   }
 
   const elTreatment = document.getElementById("sum-treatment");
-  const elStylist = document.getElementById("sum-stylist");
   const elDate = document.getElementById("sum-date");
   const elTime = document.getElementById("sum-time");
   const elCustomer = document.getElementById("sum-customer");
@@ -363,7 +326,6 @@ export function updateSummary() {
   const elTotal = document.getElementById("sum-total");
 
   if (elTreatment) elTreatment.textContent = `${bookingState.treatment} (${bookingState.durationLabel})`;
-  if (elStylist) elStylist.textContent = bookingState.stylist || "First Available Pro";
   if (elDate) elDate.textContent = bookingState.displayDate || bookingState.date || "Today";
   if (elTime) {
     elTime.textContent = bookingState.time ? bookingState.time : "Please select slot";
@@ -429,6 +391,18 @@ export function goToBookingStep(stepNumber) {
 }
 
 /**
+ * Generates UPI Deep Link URI.
+ */
+export function getUpiDeepLink(booking) {
+  const vpa = CONFIG.UPI_VPA;
+  const name = encodeURIComponent(CONFIG.SALON_NAME);
+  const amount = booking.price || 130;
+  const tr = booking.bookingId || "TRS";
+  const note = encodeURIComponent(`Booking ${tr}`);
+  return `upi://pay?pa=${vpa}&pn=${name}&am=${amount}&tr=${tr}&tn=${note}&cu=INR`;
+}
+
+/**
  * Helper to generate Google Calendar Event URL.
  */
 export function getGoogleCalendarUrl(booking) {
@@ -445,7 +419,6 @@ export function getGoogleCalendarUrl(booking) {
   const endH = String(Math.floor(endMins / 60)).padStart(2, '0');
   const endM = String(endMins % 60).padStart(2, '0');
 
-  // Format: YYYYMMDDTHHMMSS (local Indian time)
   const startIso = `${dateClean}T${startH}${startM}00`;
   const endIso = `${dateClean}T${endH}${endM}00`;
 
@@ -454,7 +427,6 @@ export function getGoogleCalendarUrl(booking) {
     `Confirmed Appointment at ${CONFIG.SALON_NAME}\n` +
     `Booking ID: #${booking.bookingId}\n` +
     `Treatment: ${booking.treatment} (${booking.durationLabel || '30 mins'})\n` +
-    `Stylist: ${booking.stylist || 'First Available Pro'}\n` +
     `Total: ₹${booking.price}\n\n` +
     `📌 Important: Please arrive 10 minutes early at the salon!`
   );
@@ -491,7 +463,7 @@ export function downloadIcsFile(booking) {
     `DTSTART:${dateClean}T${startH}${startM}00`,
     `DTEND:${dateClean}T${endH}${endM}00`,
     `SUMMARY:${CONFIG.SALON_NAME} - ${booking.treatment}`,
-    `DESCRIPTION:Confirmed Booking #${booking.bookingId}\\nTreatment: ${booking.treatment}\\nStylist: ${booking.stylist || 'Pro'}\\nPlease arrive 10 mins early!`,
+    `DESCRIPTION:Confirmed Booking #${booking.bookingId}\\nTreatment: ${booking.treatment}\\nPlease arrive 10 mins early!`,
     `LOCATION:${CONFIG.SALON_ADDRESS}`,
     "STATUS:CONFIRMED",
     "BEGIN:VALARM",
@@ -562,6 +534,7 @@ export function displayBookingConfirmation(bookingId) {
   const elGCalBtn = document.getElementById("btn-gcal-sync");
   const elIcalBtn = document.getElementById("btn-ical-download");
   const elCancelBtn = document.getElementById("btn-cancel-this-booking");
+  const elUpiQrWrap = document.getElementById("upi-qr-section");
 
   if (elConfirmId) elConfirmId.textContent = `#${bookingId}`;
   if (elSumStatus) {
@@ -591,13 +564,43 @@ export function displayBookingConfirmation(bookingId) {
     }
   }
 
+  // Dynamic UPI QR & Deep Link Section
+  if (elUpiQrWrap) {
+    if (bookingState.paymentMethod.includes("UPI") || bookingState.paymentMethod.includes("Online")) {
+      const upiUrl = getUpiDeepLink(bookingState);
+      const qrImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiUrl)}`;
+
+      elUpiQrWrap.innerHTML = `
+        <div class="upi-payment-box">
+          <div class="upi-header">
+            <span class="badge badge-gold">Direct UPI Payment</span>
+            <h4 style="font-size:1.05rem; font-weight:700; margin-top:0.4rem;">Scan & Pay ₹${bookingState.price}</h4>
+          </div>
+          <div class="upi-qr-card">
+            <img src="${qrImgUrl}" alt="UPI Payment QR" class="upi-qr-image" width="160" height="160" loading="lazy">
+            <div class="upi-apps-row">
+              <span>Google Pay</span> • <span>PhonePe</span> • <span>Paytm</span> • <span>BHIM</span>
+            </div>
+          </div>
+          <div style="margin-top:0.85rem;">
+            <a href="${upiUrl}" class="btn btn-primary" style="width:100%; font-size:0.9rem;">
+              ⚡ Pay ₹${bookingState.price} via UPI App
+            </a>
+          </div>
+        </div>
+      `;
+      elUpiQrWrap.style.display = "block";
+    } else {
+      elUpiQrWrap.style.display = "none";
+    }
+  }
+
   // WhatsApp Alert
   if (elWhatsAppBtn) {
     const msg = encodeURIComponent(
       `Hello ${CONFIG.SALON_NAME}! Here is my confirmed appointment:\n` +
       `Booking ID: #${bookingId}\n` +
       `Treatment: ${bookingState.treatment} (${bookingState.durationLabel})\n` +
-      `Stylist: ${bookingState.stylist}\n` +
       `Date: ${bookingState.displayDate || bookingState.date}\n` +
       `Time: ${bookingState.time}\n` +
       `Total: ₹${bookingState.price}\n` +
@@ -652,7 +655,6 @@ export function displayBookingDetails(booking) {
   bookingState.bookingId = booking.bookingId;
   bookingState.treatment = booking.treatment;
   bookingState.price = booking.price || 130;
-  bookingState.stylist = booking.stylist || "First Available Pro";
   bookingState.date = booking.date;
   bookingState.displayDate = booking.date;
   bookingState.time = booking.time;

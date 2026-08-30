@@ -1,23 +1,23 @@
 /* ==========================================================================
-   CSS VARIABLES, THEME & RESET
+   THANGARAJA SALON - MINIMAL LUXURY THEME & RESET
    ========================================================================== */
 
 :root {
-  --bg-dark: #090d16;
-  --bg-surface: #111827;
-  --bg-surface-elevated: #162032;
-  --bg-card: rgba(22, 32, 50, 0.7);
+  --bg-dark: #07090e;
+  --bg-surface: #0e131d;
+  --bg-surface-elevated: #141c2b;
+  --bg-card: rgba(20, 28, 43, 0.7);
+  
   --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-active: #f59e0b;
-  --border-highlight: rgba(245, 158, 11, 0.3);
+  --border-active: #d4af37;
+  --border-highlight: rgba(212, 175, 55, 0.35);
 
-  /* Brand Accents */
-  --accent-gold: #f59e0b;
-  --accent-gold-light: #fbbf24;
-  --accent-gold-dark: #b45309;
-  --accent-gold-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+  /* Refined Champagne Gold & Brand Accents */
+  --accent-gold: #d4af37;
+  --accent-gold-light: #f3d078;
+  --accent-gold-dark: #9a7b20;
+  --accent-gold-gradient: linear-gradient(135deg, #e5c06e 0%, #d4af37 50%, #aa8528 100%);
   --accent-blue: #3b82f6;
-  --accent-blue-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 
   /* Status Colors */
   --success: #10b981;
@@ -32,23 +32,22 @@
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --text-gold: #fcd34d;
+  --text-gold: #f3d078;
 
   --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-heading: 'Cinzel', serif;
 
-  /* Sizing & Layout */
+  /* Geometry & Shadows */
   --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --radius-full: 9999px;
 
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
-  --shadow-gold: 0 0 25px rgba(245, 158, 11, 0.25);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 20px -3px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 30px -5px rgba(0, 0, 0, 0.6);
 
-  --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *, *::before, *::after {
@@ -64,7 +63,6 @@ html {
   color: var(--text-primary);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -87,24 +85,24 @@ button, input, select, textarea {
 
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1160px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
 
 .section-padding {
-  padding: 5rem 0;
+  padding: 4.5rem 0;
 }
 
 @media (max-width: 768px) {
   .section-padding {
-    padding: 3.5rem 0;
+    padding: 3rem 0;
   }
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 7px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-dark);
@@ -117,7 +115,6 @@ button, input, select, textarea {
   background: #334155;
 }
 
-/* Keyframes */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }

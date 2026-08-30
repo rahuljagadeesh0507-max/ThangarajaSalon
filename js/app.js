@@ -1,8 +1,9 @@
 /**
  * Thangaraja Salon - Application Bootstrap & Event Controller
+ * (Minimalist Shop-Based Architecture)
  */
 
-import { CONFIG, SERVICES, STYLISTS } from './config.js';
+import { CONFIG, SERVICES } from './config.js';
 import {
   bookingState,
   selectPayment as stateSelectPayment,
@@ -16,7 +17,6 @@ import {
 } from './api.js';
 import {
   renderTreatments,
-  renderStylists,
   renderDatePills,
   renderTimeSlots,
   updateSummary,
@@ -55,7 +55,6 @@ async function initApp() {
   bookingState.displayDate = displayStr;
 
   renderTreatments();
-  renderStylists();
   renderDatePills(new Date());
   renderTimeSlots();
   updateSummary();
@@ -121,7 +120,7 @@ function bindEvents() {
 
   if (payCardOnline) {
     payCardOnline.addEventListener("click", () => {
-      stateSelectPayment("Online Payment");
+      stateSelectPayment("UPI / Online Payment");
       payCardOnline.classList.add("selected");
       if (payCardSalon) payCardSalon.classList.remove("selected");
       updateSummary();
@@ -201,7 +200,6 @@ async function handleFinalSubmit() {
     phone: bookingState.phone.replace(/\D/g, ''),
     treatment: bookingState.treatment,
     durationMins: String(bookingState.durationMins),
-    stylist: bookingState.stylist,
     price: String(bookingState.price),
     date: bookingState.date,
     time: bookingState.time,
@@ -218,7 +216,6 @@ async function handleFinalSubmit() {
       time: bookingState.time,
       treatment: bookingState.treatment,
       durationMins: bookingState.durationMins,
-      stylist: bookingState.stylist,
       price: bookingState.price,
       name: bookingState.name,
       email: bookingState.email,

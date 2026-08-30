@@ -1,8 +1,9 @@
 /**
  * Thangaraja Salon - Booking State Management
+ * (Shop-Based Minimalist Architecture)
  */
 
-import { CONFIG, SERVICES, STYLISTS } from './config.js';
+import { CONFIG, SERVICES } from './config.js';
 import { getSlotAvailabilityStatus } from './duration.js';
 
 export const bookingState = {
@@ -10,14 +11,13 @@ export const bookingState = {
   price: 130,
   durationMins: 30,
   durationLabel: "30 mins",
-  stylist: "First Available Pro",
   date: "",           // YYYY-MM-DD
   displayDate: "",    // e.g. "28 Aug 2026"
   time: "",           // e.g. "09:30 AM"
   name: "",
   email: "",
   phone: "",
-  paymentMethod: "Online Payment",
+  paymentMethod: "UPI / Online Payment",
   paymentStatus: "Pending Verification",
   bookingStatus: "Confirmed",
   bookingId: "",
@@ -49,7 +49,6 @@ export function saveConfirmedBooking(booking) {
   try {
     const raw = localStorage.getItem(CONFIG.STORAGE_KEY_BOOKINGS);
     const stored = JSON.parse(raw || "[]");
-    // Remove if already exists to overwrite
     const filtered = stored.filter(b => b.bookingId !== booking.bookingId);
     filtered.push(booking);
     localStorage.setItem(CONFIG.STORAGE_KEY_BOOKINGS, JSON.stringify(filtered));
@@ -109,10 +108,6 @@ export function selectTreatment(treatmentName, price) {
   return { slotInvalidated, previousTime, newDurationLabel: service.durationLabel };
 }
 
-export function selectStylist(stylistName) {
-  bookingState.stylist = String(stylistName || "First Available Pro").trim();
-}
-
 export function selectDate(isoStr, displayStr) {
   bookingState.date = isoStr;
   bookingState.displayDate = displayStr;
@@ -131,7 +126,7 @@ export function setCustomer(name, email, phone) {
 
 export function setPayment(method) {
   bookingState.paymentMethod = method;
-  bookingState.paymentStatus = (method === "Online Payment")
+  bookingState.paymentStatus = (method.includes("UPI") || method.includes("Online"))
     ? "Pending Verification"
     : "Pay at Salon";
 }
