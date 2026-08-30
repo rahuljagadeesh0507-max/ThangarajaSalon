@@ -1,4 +1,10 @@
-import { isRateLimited, APPS_SCRIPT_URL } from './_shared.js';
+import {
+  isRateLimited,
+  APPS_SCRIPT_URL,
+  getServiceDuration,
+  parseTimeToMinutes,
+  checkScheduleBoundaries
+} from './_shared.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -35,6 +41,7 @@ export default async function handler(req, res) {
       date,
       time,
       treatment,
+      durationMins,
       price,
       paymentMethod,
       paymentStatus,
@@ -49,12 +56,36 @@ export default async function handler(req, res) {
       });
     }
 
+    // 1. Tuesday Closed Validation
+    const chosenDate = new Date(String(date).trim() + "T00:00:00");
+    if (chosenDate.getDay() === 2) {
+      return res.status(400).json({
+        success: false,
+        error: 'TUESDAY_CLOSED',
+        message: 'The salon is closed on Tuesdays (Weekly Holiday).'
+      });
+    }
+
+    // 2. Duration & Schedule Boundary Validation
+    const cleanTreatment = String(treatment || 'Hair Cut').trim();
+    const effectiveDuration = Number(durationMins) || getServiceDuration(cleanTreatment);
+    const slotMins = parseTimeToMinutes(time);
+
+    const boundaryResult = checkScheduleBoundaries(slotMins, effectiveDuration);
+    if (!boundaryResult.valid) {
+      return res.status(400).json({
+        success: false,
+        error: boundaryResult.error,
+        message: boundaryResult.message
+      });
+    }
+
     const cleanPhone = String(phone).replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
+    if (cleanPhone.length !== 10) {
       return res.status(400).json({
         success: false,
         error: 'INVALID_PHONE',
-        message: 'Please provide a valid 10-digit mobile number.'
+        message: 'Please provide a valid 10-digit Indian mobile number.'
       });
     }
 
@@ -64,7 +95,8 @@ export default async function handler(req, res) {
       name: String(name).trim(),
       email: String(email).trim(),
       phone: cleanPhone,
-      treatment: String(treatment || 'Hair Cut').trim(),
+      treatment: cleanTreatment,
+      durationMins: String(effectiveDuration),
       price: String(price || '130').trim(),
       date: String(date).trim(),
       time: String(time).trim(),

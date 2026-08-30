@@ -1,9 +1,11 @@
 /**
- * Thangaraja Salon - Google Apps Script Backend (Phase 1 Hardened)
+ * Thangaraja Salon - Google Apps Script Backend (Duration & Overlap Hardened)
  * 
  * Features:
+ * - Treatment Duration Mapping & Multi-Slot Overlap Detection
+ * - Break Time & Closing Time Boundary Enforcement
  * - Anti-Formula Injection (CSV/Spreadsheet injection defense)
- * - Atomic Concurrency Locking (LockService) to prevent slot collision
+ * - Atomic Concurrency Locking (LockService) to prevent double-bookings
  * - Complete 12-Column Schema with zero data loss
  * - Dynamic Booked Slots querying and Real Booking Lookup
  */
@@ -23,6 +25,20 @@ const HEADERS = [
   "Booking Status"
 ];
 
+const SERVICE_DURATIONS_ = {
+  "hair cut": 30,
+  "trim": 30,
+  "shaving": 30,
+  "normal hair cut + shaving": 30,
+  "detan": 30,
+  "bleach": 30,
+  "facial": 60,
+  "hair spa": 90,
+  "straightening": 120,
+  "smoothing": 90,
+  "curling": 150
+};
+
 function getResponsesSheet_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = ss.getSheetByName("Responses");
@@ -35,7 +51,6 @@ function getResponsesSheet_() {
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
   } else if (sheet.getLastColumn() < HEADERS.length) {
-    // If existing sheet has older 4-column schema, upgrade header row
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     sheet.getRange(1, 1, 1, HEADERS.length).setFontWeight("bold");
   }
@@ -64,24 +79,77 @@ function formatCellString_(val, isDate = false) {
   return String(val || "").trim();
 }
 
-function isSlotAvailable_(sheet, dateStr, timeStr) {
-  const data = sheet.getDataRange().getValues();
-  if (data.length <= 1) return true;
+function parseTimeToMinutes_(timeStr) {
+  if (!timeStr) return 0;
+  const match = String(timeStr).trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return 0;
+  let h = parseInt(match[1], 10);
+  const m = parseInt(match[2], 10);
+  const meridian = match[3].toUpperCase();
+  if (meridian === "PM" && h < 12) h += 12;
+  if (meridian === "AM" && h === 12) h = 0;
+  return h * 60 + m;
+}
 
+function getTreatmentDuration_(treatmentName) {
+  if (!treatmentName) return 30;
+  const key = String(treatmentName).trim().toLowerCase();
+  return SERVICE_DURATIONS_[key] || 30;
+}
+
+function isIntervalOverlapping_(startA, durA, startB, durB) {
+  const endA = startA + durA;
+  const endB = startB + durB;
+  return Math.max(startA, startB) < Math.min(endA, endB);
+}
+
+function isSlotAvailable_(sheet, dateStr, timeStr, durationMins) {
   const targetDate = String(dateStr || "").trim();
-  const targetTime = String(timeStr || "").trim().toUpperCase();
+  const candStart = parseTimeToMinutes_(timeStr);
+  const candDur = Number(durationMins) || 30;
+  const candEnd = candStart + candDur;
 
-  for (let i = 1; i < data.length; i++) {
-    const row = data[i];
-    const rowDate = formatCellString_(row[7], true);
-    const rowTime = formatCellString_(row[8], false).toUpperCase();
-    const rowStatus = String(row[11] || "").trim().toLowerCase();
+  // 1. Tuesday Closed Check
+  const dateObj = new Date(targetDate + "T00:00:00");
+  if (dateObj.getDay() === 2) {
+    return { available: false, error: "TUESDAY_CLOSED", message: "The salon is closed on Tuesdays." };
+  }
 
-    if (rowDate === targetDate && rowTime === targetTime && rowStatus !== "cancelled") {
-      return false; // Slot already taken
+  // 2. Break Collision Check (01:30 PM = 810 to 03:00 PM = 900)
+  if (candStart >= 480 && candStart < 810 && candEnd > 810) {
+    return { available: false, error: "BREAK_CONFLICT", message: "Treatment duration overlaps with Afternoon Break (1:30 PM - 3:00 PM)." };
+  }
+  if (candStart >= 810 && candStart < 900) {
+    return { available: false, error: "INSIDE_BREAK", message: "Cannot book appointments during Afternoon Break." };
+  }
+
+  // 3. Closing Time Check (10:00 PM = 1320)
+  if (candStart >= 900 && candEnd > 1320) {
+    return { available: false, error: "CLOSING_CONFLICT", message: "Treatment duration extends past Salon Closing Time (10:00 PM)." };
+  }
+
+  // 4. Overlap Check against Existing Active Bookings in Sheet
+  const data = sheet.getDataRange().getValues();
+  if (data.length > 1) {
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const rowDate = formatCellString_(row[7], true);
+      const rowTime = formatCellString_(row[8], false);
+      const rowTreatment = formatCellString_(row[5], false);
+      const rowStatus = String(row[11] || "").trim().toLowerCase();
+
+      if (rowDate === targetDate && rowStatus !== "cancelled" && rowTime) {
+        const existStart = parseTimeToMinutes_(rowTime);
+        const existDur = getTreatmentDuration_(rowTreatment);
+
+        if (isIntervalOverlapping_(candStart, candDur, existStart, existDur)) {
+          return { available: false, error: "SLOT_TAKEN", message: "This slot or one of its required duration intervals is already booked." };
+        }
+      }
     }
   }
-  return true;
+
+  return { available: true };
 }
 
 function getBookedSlotsForDate_(sheet, dateStr) {
@@ -95,10 +163,15 @@ function getBookedSlotsForDate_(sheet, dateStr) {
     const row = data[i];
     const rowDate = formatCellString_(row[7], true);
     const rowTime = formatCellString_(row[8], false);
+    const rowTreatment = formatCellString_(row[5], false);
     const rowStatus = String(row[11] || "").trim().toLowerCase();
 
     if (rowDate === targetDate && rowStatus !== "cancelled" && rowTime) {
-      booked.push(rowTime);
+      booked.push({
+        time: rowTime,
+        treatment: rowTreatment,
+        durationMins: getTreatmentDuration_(rowTreatment)
+      });
     }
   }
   return booked;
@@ -139,6 +212,7 @@ function saveBooking_(params) {
   const email = sanitizeSpreadsheetInput_(params.email);
   const phone = sanitizeSpreadsheetInput_(params.phone);
   const treatment = sanitizeSpreadsheetInput_(params.treatment || "Hair Cut");
+  const durationMins = Number(params.durationMins) || getTreatmentDuration_(treatment);
   const price = sanitizeSpreadsheetInput_(params.price || "130");
   const date = sanitizeSpreadsheetInput_(params.date);
   const time = sanitizeSpreadsheetInput_(params.time);
@@ -174,11 +248,12 @@ function saveBooking_(params) {
   try {
     const sheet = getResponsesSheet_();
 
-    if (!isSlotAvailable_(sheet, date, time)) {
+    const check = isSlotAvailable_(sheet, date, time, durationMins);
+    if (!check.available) {
       return {
         success: false,
-        error: "SLOT_TAKEN",
-        message: "This slot is already booked. Please choose another time slot."
+        error: check.error || "SLOT_TAKEN",
+        message: check.message || "This slot is already booked. Please choose another time slot."
       };
     }
 
