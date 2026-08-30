@@ -387,9 +387,9 @@ export function goToBookingStep(stepNumber) {
     }
   }
 
-  const appWrap = document.querySelector(".booking-app-wrapper");
-  if (appWrap && window.innerWidth < 768) {
-    appWrap.scrollIntoView({ behavior: "smooth" });
+  const appWrap = document.querySelector(".booking-app-wrapper") || document.getElementById("booking-app");
+  if (appWrap) {
+    appWrap.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 }
 

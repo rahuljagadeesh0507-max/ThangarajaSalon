@@ -6,6 +6,14 @@ import {
   checkScheduleBoundaries
 } from './_shared.js';
 
+function mapLegacyTreatment(treatment) {
+  const norm = String(treatment || '').toLowerCase().trim();
+  if (norm.includes('shav') && (norm.includes('cut') || norm.includes('hair'))) return 'Hair Cut + Trim';
+  if (norm.includes('trim')) return 'Hair Cut + Trim';
+  if (norm.includes('shav')) return 'Shaving';
+  return 'Basic Hair Cut';
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({
@@ -100,27 +108,54 @@ export default async function handler(req, res) {
       price: String(price || '130').trim(),
       date: String(date).trim(),
       time: String(time).trim(),
-      paymentMethod: String(paymentMethod || 'Online Payment').trim(),
+      paymentMethod: String(paymentMethod || 'UPI / Online Payment').trim(),
       paymentStatus: String(paymentStatus || 'Pending Verification').trim()
     };
 
+    // Primary Submission
     const queryParams = new URLSearchParams(payload);
-    const gasResponse = await fetch(`${APPS_SCRIPT_URL}?${queryParams.toString()}`, {
+    let gasResponse = await fetch(`${APPS_SCRIPT_URL}?${queryParams.toString()}`, {
       method: 'POST',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' }
     });
 
-    const data = await gasResponse.json();
+    let data = await gasResponse.json().catch(() => null);
 
+    // Fallback: If legacy Google Apps Script rejects treatment name, retry with legacy format
     if (data && data.success === false) {
+      const errMsg = (data.error || '') + ' ' + (data.message || '');
+      if (errMsg.toLowerCase().includes('treatment') || errMsg.toLowerCase().includes('valid options')) {
+        const fallbackPayload = {
+          ...payload,
+          treatment: mapLegacyTreatment(cleanTreatment)
+        };
+        const fallbackParams = new URLSearchParams(fallbackPayload);
+        const retryRes = await fetch(`${APPS_SCRIPT_URL}?${fallbackParams.toString()}`, {
+          method: 'POST',
+          body: JSON.stringify(fallbackPayload),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const retryData = await retryRes.json().catch(() => null);
+        if (retryData && retryData.success) {
+          return res.status(200).json({
+            success: true,
+            bookingId: payload.bookingId,
+            treatment: cleanTreatment,
+            price: payload.price,
+            date: payload.date,
+            time: payload.time
+          });
+        }
+      }
+
       if (data.error === 'SLOT_TAKEN') {
         return res.status(409).json(data);
       }
       return res.status(400).json(data);
     }
 
-    return res.status(200).json(data || { success: true, bookingId: payload.bookingId });
+    return res.status(200).json(data || { success: true, bookingId: payload.bookingId, treatment: cleanTreatment });
   } catch (error) {
     console.error('API /api/book error:', error);
     return res.status(500).json({

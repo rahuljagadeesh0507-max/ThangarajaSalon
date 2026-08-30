@@ -6,7 +6,7 @@
 export const CONFIG = {
   SALON_NAME: "Thangaraja Men's Salon",
   SALON_TAGLINE: "Precision Barbering & Modern Grooming",
-  SALON_ADDRESS: "Main Street Salon Plaza, Near City Center",
+  SALON_ADDRESS: "No 383, 1st Street, Sanjay Nagar, Vysarpadi, Chennai 600 039",
   SALON_PHONE: "+919876543210",
   UPI_VPA: "thangarajasalon@upi", // Replace with salon's actual UPI VPA / Merchant ID
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzqF35_WZsrH5-bVPYWaPYP20DklEfmxLd8uc78BYtOS4UAFtjUrHE0nqFMLoIeB06W2Q/exec",
