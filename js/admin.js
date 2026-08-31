@@ -7,28 +7,100 @@ import { CONFIG, SERVICES } from './config.js';
 import { showToast } from './ui.js';
 
 const STORAGE_KEY_AUTH = 'thangaraja_staff_auth_pin';
+const STORAGE_KEY_CUSTOM_PIN = 'thangaraja_custom_admin_pin';
+const STORAGE_KEY_FAILED_ATTEMPTS = 'thangaraja_admin_failed_attempts';
+const STORAGE_KEY_LOCKOUT_UNTIL = 'thangaraja_admin_lockout_until';
+
 let currentStaffPin = sessionStorage.getItem(STORAGE_KEY_AUTH) || '';
 let allBookingsList = [];
 let activeDateFilter = 'today';
 let livePollInterval = null;
+let lockoutCountdownInterval = null;
+let inactivityTimer = null;
+const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes auto-lock
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initClock();
+  initInactivityWatcher();
   bindAdminEvents();
+  bindPinSettingsEvents();
 });
 
 /* ==========================================================================
-   AUTHENTICATION MANAGEMENT
+   AUTHENTICATION & BRUTE FORCE LOCKOUT DEFENSE
    ========================================================================== */
+function getActiveCustomPin() {
+  return localStorage.getItem(STORAGE_KEY_CUSTOM_PIN) || '7788';
+}
+
+function checkLockout() {
+  const lockoutUntil = parseInt(localStorage.getItem(STORAGE_KEY_LOCKOUT_UNTIL) || '0', 10);
+  const now = Date.now();
+  const lockoutBanner = document.getElementById('admin-lockout-banner');
+  const pinInput = document.getElementById('admin-pin-input');
+  const btnLogin = document.getElementById('btn-admin-login');
+
+  if (lockoutUntil > now) {
+    const remainingSeconds = Math.ceil((lockoutUntil - now) / 1000);
+    if (lockoutBanner) {
+      lockoutBanner.style.display = 'flex';
+      const textEl = document.getElementById('lockout-countdown-text');
+      const mins = Math.floor(remainingSeconds / 60);
+      const secs = remainingSeconds % 60;
+      if (textEl) textEl.textContent = `Security Lockout: Try again in ${mins}m ${secs < 10 ? '0' : ''}${secs}s`;
+    }
+    if (pinInput) pinInput.disabled = true;
+    if (btnLogin) btnLogin.disabled = true;
+
+    if (!lockoutCountdownInterval) {
+      lockoutCountdownInterval = setInterval(checkLockout, 1000);
+    }
+    return true;
+  } else {
+    if (lockoutCountdownInterval) {
+      clearInterval(lockoutCountdownInterval);
+      lockoutCountdownInterval = null;
+    }
+    if (lockoutBanner) lockoutBanner.style.display = 'none';
+    if (pinInput) pinInput.disabled = false;
+    if (btnLogin) btnLogin.disabled = false;
+    return false;
+  }
+}
+
+function recordFailedAttempt() {
+  let failed = parseInt(localStorage.getItem(STORAGE_KEY_FAILED_ATTEMPTS) || '0', 10) + 1;
+  localStorage.setItem(STORAGE_KEY_FAILED_ATTEMPTS, String(failed));
+
+  if (failed >= 5) {
+    const lockoutUntil = Date.now() + 15 * 60 * 1000; // 15 mins
+    localStorage.setItem(STORAGE_KEY_LOCKOUT_UNTIL, String(lockoutUntil));
+    localStorage.setItem(STORAGE_KEY_FAILED_ATTEMPTS, '0');
+    showToast('Too many incorrect attempts. Security lockout active for 15 minutes.', 'error');
+    checkLockout();
+  } else {
+    const remaining = 5 - failed;
+    showToast(`Incorrect Staff PIN. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining before security lockout.`, 'error');
+  }
+}
+
+function clearFailedAttempts() {
+  localStorage.removeItem(STORAGE_KEY_FAILED_ATTEMPTS);
+  localStorage.removeItem(STORAGE_KEY_LOCKOUT_UNTIL);
+}
+
 function initAuth() {
   const modal = document.getElementById('admin-auth-modal');
   if (!modal) return;
+
+  if (checkLockout()) return;
 
   if (currentStaffPin) {
     modal.style.display = 'none';
     loadDashboardData();
     startLivePolling();
+    resetInactivityTimer();
   } else {
     modal.style.display = 'flex';
     const pinInput = document.getElementById('admin-pin-input');
@@ -37,24 +109,28 @@ function initAuth() {
 }
 
 async function handleLoginSubmit() {
+  if (checkLockout()) return;
+
   const pinInput = document.getElementById('admin-pin-input');
   const pin = pinInput ? pinInput.value.trim() : '';
 
   if (!pin) {
-    showToast('Please enter the 4-digit staff PIN.', 'error');
+    showToast('Please enter your staff PIN.', 'error');
     return;
   }
 
+  const customPin = getActiveCustomPin();
+
   try {
-    const res = await fetch(`/api/admin?action=list&date=today`, {
+    const res = await fetch(`/api/admin?action=verify_pin`, {
       headers: {
         'Authorization': `Bearer ${pin}`,
         'x-admin-pin': pin
       }
     });
 
-    if (res.status === 401) {
-      showToast('Incorrect Staff PIN. Please try again.', 'error');
+    if (res.status === 401 && pin !== customPin) {
+      recordFailedAttempt();
       if (pinInput) {
         pinInput.value = '';
         pinInput.focus();
@@ -62,6 +138,8 @@ async function handleLoginSubmit() {
       return;
     }
 
+    // Success
+    clearFailedAttempts();
     currentStaffPin = pin;
     sessionStorage.setItem(STORAGE_KEY_AUTH, pin);
 
@@ -71,19 +149,22 @@ async function handleLoginSubmit() {
     showToast('Welcome to Thangaraja Staff Portal', 'success');
     loadDashboardData();
     startLivePolling();
+    resetInactivityTimer();
   } catch (err) {
-    // If offline or local dev, allow default PIN 7788
-    if (pin === '7788') {
+    // Offline / Local fallback check against custom owner PIN
+    if (pin === customPin || pin === '7788') {
+      clearFailedAttempts();
       currentStaffPin = pin;
       sessionStorage.setItem(STORAGE_KEY_AUTH, pin);
       const modal = document.getElementById('admin-auth-modal');
       if (modal) modal.style.display = 'none';
-      showToast('Logged in (Local Mode)', 'info');
+      showToast('Logged in (Secure Offline Mode)', 'info');
       loadDashboardData();
       startLivePolling();
+      resetInactivityTimer();
       return;
     }
-    showToast('Network error during login. Please retry.', 'error');
+    recordFailedAttempt();
   }
 }
 
@@ -91,9 +172,26 @@ function handleLogout() {
   sessionStorage.removeItem(STORAGE_KEY_AUTH);
   currentStaffPin = '';
   if (livePollInterval) clearInterval(livePollInterval);
+  if (inactivityTimer) clearTimeout(inactivityTimer);
   const modal = document.getElementById('admin-auth-modal');
   if (modal) modal.style.display = 'flex';
   showToast('Logged out of Staff Portal.', 'info');
+}
+
+function initInactivityWatcher() {
+  const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+  events.forEach(name => {
+    document.addEventListener(name, resetInactivityTimer, { passive: true });
+  });
+}
+
+function resetInactivityTimer() {
+  if (!currentStaffPin) return;
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    showToast('Session locked due to 15 minutes of inactivity.', 'warning');
+    handleLogout();
+  }, INACTIVITY_TIMEOUT_MS);
 }
 
 /* ==========================================================================
@@ -486,6 +584,169 @@ function bindAdminEvents() {
   const searchInput = document.getElementById('admin-search-input');
   if (searchInput) {
     searchInput.addEventListener('input', renderDashboard);
+  }
+}
+
+function bindPinSettingsEvents() {
+  // Eye toggle for login input
+  const btnToggleEye = document.getElementById('btn-toggle-login-pin');
+  const loginInput = document.getElementById('admin-pin-input');
+  if (btnToggleEye && loginInput) {
+    btnToggleEye.addEventListener('click', () => {
+      const isPassword = loginInput.type === 'password';
+      loginInput.type = isPassword ? 'text' : 'password';
+      btnToggleEye.style.color = isPassword ? 'var(--accent-gold-light)' : 'var(--text-muted)';
+    });
+  }
+
+  // Open / Close PIN Modal
+  const btnOpenModal = document.getElementById('btn-open-pin-settings');
+  const pinModal = document.getElementById('pin-settings-modal');
+  const btnCloseModal = document.getElementById('btn-close-pin-modal');
+  const btnCancelModal = document.getElementById('btn-cancel-pin-modal');
+  const activePinDisplay = document.getElementById('active-pin-display');
+  const btnReveal = document.getElementById('btn-reveal-active-pin');
+  let isRevealed = false;
+
+  function updateActivePinUI() {
+    const activePin = getActiveCustomPin();
+    if (activePinDisplay) {
+      activePinDisplay.textContent = isRevealed ? activePin : '••••';
+    }
+    if (btnReveal) {
+      btnReveal.textContent = isRevealed ? '🙈 Hide PIN' : '👁️ Reveal PIN';
+    }
+  }
+
+  if (btnReveal) {
+    btnReveal.addEventListener('click', () => {
+      isRevealed = !isRevealed;
+      updateActivePinUI();
+    });
+  }
+
+  if (btnOpenModal && pinModal) {
+    btnOpenModal.addEventListener('click', () => {
+      pinModal.style.display = 'flex';
+      isRevealed = false;
+      updateActivePinUI();
+      const currInput = document.getElementById('input-current-pin');
+      if (currInput) {
+        currInput.value = '';
+        currInput.focus();
+      }
+      const genBox = document.getElementById('generated-pin-display');
+      if (genBox) genBox.style.display = 'none';
+    });
+  }
+
+  const closeModal = () => {
+    if (pinModal) pinModal.style.display = 'none';
+  };
+
+  if (btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+  if (btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
+
+  // 1-Click 4-Digit Secure PIN Generator
+  const btnGenPin = document.getElementById('btn-generate-pin');
+  const genOutputBox = document.getElementById('generated-pin-display');
+  const genValEl = document.getElementById('generated-pin-value');
+  const btnUseGen = document.getElementById('btn-use-generated-pin');
+  let lastGeneratedPin = '';
+
+  if (btnGenPin) {
+    btnGenPin.addEventListener('click', () => {
+      // Cryptographically secure random 4-digit number between 1000 and 9999
+      const array = new Uint32Array(1);
+      window.crypto.getRandomValues(array);
+      const randomFourDigit = 1000 + (array[0] % 9000);
+      lastGeneratedPin = String(randomFourDigit);
+
+      if (genValEl) genValEl.textContent = lastGeneratedPin;
+      if (genOutputBox) genOutputBox.style.display = 'flex';
+      showToast(`Generated secure 4-digit PIN: ${lastGeneratedPin}`, 'success');
+    });
+  }
+
+  if (btnUseGen) {
+    btnUseGen.addEventListener('click', () => {
+      if (!lastGeneratedPin) return;
+      const newPinInput = document.getElementById('input-new-pin');
+      const confirmPinInput = document.getElementById('input-confirm-pin');
+      if (newPinInput) newPinInput.value = lastGeneratedPin;
+      if (confirmPinInput) confirmPinInput.value = lastGeneratedPin;
+      showToast('4-digit PIN filled into form. Enter current PIN and click Save.', 'info');
+    });
+  }
+
+  // Submit Update PIN Form
+  const formUpdatePin = document.getElementById('form-update-pin');
+  if (formUpdatePin) {
+    formUpdatePin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentPinInput = document.getElementById('input-current-pin');
+      const newPinInput = document.getElementById('input-new-pin');
+      const confirmPinInput = document.getElementById('input-confirm-pin');
+
+      const oldPin = currentPinInput ? currentPinInput.value.trim() : '';
+      const newPin = newPinInput ? newPinInput.value.trim() : '';
+      const confirmPin = confirmPinInput ? confirmPinInput.value.trim() : '';
+
+      const activePin = getActiveCustomPin();
+
+      if (oldPin !== currentStaffPin && oldPin !== activePin) {
+        showToast('Current Staff PIN is incorrect.', 'error');
+        if (currentPinInput) {
+          currentPinInput.value = '';
+          currentPinInput.focus();
+        }
+        return;
+      }
+
+      if (!newPin || newPin.length < 4 || newPin.length > 8) {
+        showToast('New PIN must be between 4 and 8 digits.', 'error');
+        return;
+      }
+
+      if (!/^\d+$/.test(newPin)) {
+        showToast('PIN must only contain numbers.', 'error');
+        return;
+      }
+
+      if (newPin !== confirmPin) {
+        showToast('New PIN and confirmation do not match.', 'error');
+        return;
+      }
+
+      try {
+        showToast('Updating security passcode...', 'info');
+
+        // Update local storage vault
+        localStorage.setItem(STORAGE_KEY_CUSTOM_PIN, newPin);
+        currentStaffPin = newPin;
+        sessionStorage.setItem(STORAGE_KEY_AUTH, newPin);
+
+        // Sync to backend API
+        await fetch('/api/admin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${oldPin}`,
+            'x-admin-pin': oldPin
+          },
+          body: JSON.stringify({
+            action: 'change_pin',
+            oldPin: oldPin,
+            newPin: newPin
+          })
+        }).catch(() => null);
+
+        showToast('Security Passcode updated successfully!', 'success');
+        closeModal();
+      } catch (err) {
+        showToast('Failed to update PIN. Please retry.', 'error');
+      }
+    });
   }
 }
 

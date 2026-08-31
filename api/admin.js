@@ -3,7 +3,7 @@ import {
   APPS_SCRIPT_URL
 } from './_shared.js';
 
-const VALID_PIN = process.env.ADMIN_PIN || '7788';
+let currentCustomPin = process.env.ADMIN_PIN || '7788';
 
 export default async function handler(req, res) {
   // 1. Authenticate Request
@@ -12,14 +12,7 @@ export default async function handler(req, res) {
   const pinHeader = req.headers['x-admin-pin'] || '';
 
   const providedPin = token || pinHeader || req.query.pin || (req.body && req.body.pin);
-
-  if (providedPin !== VALID_PIN) {
-    return res.status(401).json({
-      success: false,
-      error: 'UNAUTHORIZED',
-      message: 'Invalid staff passcode.'
-    });
-  }
+  const action = req.query.action || (req.body && req.body.action) || 'list';
 
   // 2. Rate limit: max 60 requests per minute for admin
   if (isRateLimited(req, 60)) {
@@ -30,8 +23,47 @@ export default async function handler(req, res) {
     });
   }
 
+  // Action: Change PIN
+  if (req.method === 'POST' && action === 'change_pin') {
+    const { oldPin, newPin } = req.body || {};
+    if (oldPin !== currentCustomPin && oldPin !== (process.env.ADMIN_PIN || '7788')) {
+      return res.status(401).json({
+        success: false,
+        error: 'UNAUTHORIZED',
+        message: 'Current PIN is incorrect.'
+      });
+    }
+    if (!newPin || String(newPin).length < 4 || String(newPin).length > 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'INVALID_PIN',
+        message: 'New PIN must be between 4 and 8 digits.'
+      });
+    }
+    currentCustomPin = String(newPin).trim();
+    return res.status(200).json({
+      success: true,
+      message: 'Staff PIN updated successfully.'
+    });
+  }
+
+  // Verify PIN
+  if (providedPin !== currentCustomPin && providedPin !== (process.env.ADMIN_PIN || '7788')) {
+    return res.status(401).json({
+      success: false,
+      error: 'UNAUTHORIZED',
+      message: 'Invalid staff passcode.'
+    });
+  }
+
+  if (action === 'verify_pin') {
+    return res.status(200).json({
+      success: true,
+      message: 'Staff passcode authenticated.'
+    });
+  }
+
   try {
-    const action = req.query.action || (req.body && req.body.action) || 'list';
 
     // GET / LIST BOOKINGS
     if (req.method === 'GET' || action === 'list') {

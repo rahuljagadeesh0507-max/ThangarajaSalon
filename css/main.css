@@ -90,13 +90,25 @@ button, input, select, textarea {
   padding: 0 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.85rem;
+  }
+}
+
 .section-padding {
   padding: 4.5rem 0;
 }
 
 @media (max-width: 768px) {
   .section-padding {
-    padding: 3rem 0;
+    padding: 2.75rem 0;
   }
 }
 
