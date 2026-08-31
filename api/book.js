@@ -88,12 +88,22 @@ export default async function handler(req, res) {
       });
     }
 
-    const cleanPhone = String(phone).replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const gmailRegex = /^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*@gmail\.com$/i;
+    if (!gmailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        error: 'INVALID_GMAIL',
+        message: 'Please provide a valid Gmail address (e.g. yourname@gmail.com).'
+      });
+    }
+
+    const cleanPhone = String(phone || '').replace(/\D/g, '');
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
       return res.status(400).json({
         success: false,
         error: 'INVALID_PHONE',
-        message: 'Please provide a valid 10-digit Indian mobile number.'
+        message: 'Please provide a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9 (e.g. 9876543210).'
       });
     }
 
@@ -106,7 +116,7 @@ export default async function handler(req, res) {
       action: 'book',
       bookingId: generatedId,
       name: String(name).trim(),
-      email: String(email).trim(),
+      email: cleanEmail,
       phone: cleanPhone,
       treatment: legacyTreatment,
       durationMins: String(effectiveDuration),

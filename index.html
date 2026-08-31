@@ -308,8 +308,8 @@
                 <div class="slots-grid" id="slots-container"></div>
               </div>
 
-              <div style="margin-top:2.5rem; text-align:right;">
-                <button class="btn btn-primary btn-lg" id="btn-step-1-next">
+              <div class="step-actions">
+                <button class="btn btn-primary btn-lg btn-step-full-mobile" id="btn-step-1-next">
                   Continue to Details
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
@@ -323,26 +323,29 @@
                 <p class="panel-desc">We will send your booking confirmation & WhatsApp status update here.</p>
               </div>
 
-              <form id="form-customer-details" onsubmit="event.preventDefault();">
+              <form id="form-customer-details" onsubmit="event.preventDefault();" novalidate>
                 <div class="form-group">
                   <label class="form-label" for="cust-name">Full Name *</label>
-                  <input type="text" id="cust-name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                  <input type="text" id="cust-name" class="form-control" placeholder="e.g. Rahul Sharma" autocomplete="name" required>
+                  <div class="field-feedback" id="name-feedback"></div>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label" for="cust-email">Email Address *</label>
-                  <input type="email" id="cust-email" class="form-control" placeholder="e.g. rahul@gmail.com" required>
+                  <label class="form-label" for="cust-email">Gmail Address (@gmail.com) *</label>
+                  <input type="email" id="cust-email" class="form-control" placeholder="e.g. yourname@gmail.com" autocomplete="email" required spellcheck="false" autocapitalize="none">
+                  <div class="field-feedback" id="email-feedback"></div>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label" for="cust-phone">Mobile Number (WhatsApp) *</label>
-                  <input type="tel" id="cust-phone" class="form-control" placeholder="e.g. 9876543210" maxlength="10" required>
-                  <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">
-                    10-digit Indian mobile number for instant WhatsApp confirmation.
+                  <label class="form-label" for="cust-phone">10-Digit Mobile Number (WhatsApp) *</label>
+                  <input type="tel" id="cust-phone" class="form-control" placeholder="e.g. 9876543210" maxlength="10" autocomplete="tel" required inputmode="numeric">
+                  <div class="field-feedback" id="phone-feedback"></div>
+                  <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.4rem;" id="phone-hint">
+                    Standard 10-digit Indian mobile number starting with 6, 7, 8, or 9.
                   </p>
                 </div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2.5rem;">
+                <div class="step-actions-split">
                   <button type="button" class="btn btn-secondary" id="btn-step-2-back">
                     ← Back
                   </button>
@@ -392,7 +395,7 @@
                 </div>
               </div>
 
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2rem;">
+              <div class="step-actions-split">
                 <button class="btn btn-secondary" id="btn-step-3-back">
                   ← Back
                 </button>

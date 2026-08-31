@@ -26,7 +26,12 @@ import {
   showToast,
   onManualDateChange,
   onDatePillClick,
-  promptCancelBooking
+  promptCancelBooking,
+  validateCustomerForm,
+  validateName,
+  validateGmail,
+  validatePhone,
+  updateFieldFeedback
 } from './ui.js';
 
 /**
@@ -122,13 +127,18 @@ function bindEvents() {
   if (btnStep2Next) {
     btnStep2Next.addEventListener("click", () => {
       updateSummary();
-      if (!bookingState.name || !bookingState.email || !bookingState.phone) {
-        showToast("Please fill in your name, email, and mobile number", "error");
-        return;
-      }
-      const cleanPhone = bookingState.phone.replace(/\D/g, '');
-      if (cleanPhone.length !== 10) {
-        showToast("Please enter a valid 10-digit mobile number", "error");
+      const formCheck = validateCustomerForm(true);
+      if (!formCheck.isValid) {
+        if (!formCheck.nameRes.valid) {
+          showToast(`${formCheck.nameRes.message} ${formCheck.nameRes.expected || ''}`, "error");
+          document.getElementById("cust-name")?.focus();
+        } else if (!formCheck.emailRes.valid) {
+          showToast(`${formCheck.emailRes.message} ${formCheck.emailRes.expected || ''}`, "error");
+          document.getElementById("cust-email")?.focus();
+        } else if (!formCheck.phoneRes.valid) {
+          showToast(`${formCheck.phoneRes.message} ${formCheck.phoneRes.expected || ''}`, "error");
+          document.getElementById("cust-phone")?.focus();
+        }
         return;
       }
       goToBookingStep(3);
@@ -186,13 +196,63 @@ function bindEvents() {
     });
   }
 
-  // Customer Form Inputs live summary sync
-  ["cust-name", "cust-email", "cust-phone"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener("input", updateSummary);
-    }
-  });
+  // Real-time input validation & summary sync
+  const elName = document.getElementById("cust-name");
+  if (elName) {
+    elName.addEventListener("input", (e) => {
+      updateSummary();
+      if (e.target.value.trim().length > 0) {
+        updateFieldFeedback("cust-name", "name-feedback", validateName(e.target.value), true);
+      } else {
+        updateFieldFeedback("cust-name", "name-feedback", { valid: false }, false);
+      }
+    });
+    elName.addEventListener("blur", (e) => {
+      if (e.target.value.trim().length > 0) {
+        updateFieldFeedback("cust-name", "name-feedback", validateName(e.target.value), true);
+      }
+    });
+  }
+
+  const elEmail = document.getElementById("cust-email");
+  if (elEmail) {
+    elEmail.addEventListener("input", (e) => {
+      updateSummary();
+      if (e.target.value.trim().length > 0) {
+        updateFieldFeedback("cust-email", "email-feedback", validateGmail(e.target.value), true);
+      } else {
+        updateFieldFeedback("cust-email", "email-feedback", { valid: false }, false);
+      }
+    });
+    elEmail.addEventListener("blur", (e) => {
+      if (e.target.value.trim().length > 0) {
+        updateFieldFeedback("cust-email", "email-feedback", validateGmail(e.target.value), true);
+      }
+    });
+  }
+
+  const elPhone = document.getElementById("cust-phone");
+  if (elPhone) {
+    elPhone.addEventListener("input", (e) => {
+      // Strip non-digit characters on the fly
+      const raw = e.target.value;
+      const digitsOnly = raw.replace(/\D/g, '').slice(0, 10);
+      if (raw !== digitsOnly) {
+        e.target.value = digitsOnly;
+      }
+      updateSummary();
+      if (e.target.value.length > 0) {
+        updateFieldFeedback("cust-phone", "phone-feedback", validatePhone(e.target.value), true);
+      } else {
+        updateFieldFeedback("cust-phone", "phone-feedback", { valid: false }, false);
+      }
+    });
+    elPhone.addEventListener("blur", (e) => {
+      if (e.target.value.length > 0) {
+        updateFieldFeedback("cust-phone", "phone-feedback", validatePhone(e.target.value), true);
+      }
+    });
+  }
 
   // Manual Date Input change handler
   const nativeDateInput = document.getElementById("native-date-input");
@@ -216,6 +276,12 @@ function bindEvents() {
 }
 
 async function handleFinalSubmit() {
+  const formCheck = validateCustomerForm(true);
+  if (!formCheck.isValid) {
+    goToBookingStep(2);
+    showToast("Please enter a valid Gmail address and 10-digit mobile number.", "error");
+    return;
+  }
   const btn = document.getElementById("btn-submit-booking");
   if (btn) {
     btn.disabled = true;

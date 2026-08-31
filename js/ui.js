@@ -363,9 +363,21 @@ export function goToBookingStep(stepNumber) {
     return;
   }
 
-  if (stepNumber >= 3 && (!bookingState.name || !bookingState.email || !bookingState.phone)) {
-    showToast("Please complete your name, email, and 10-digit mobile number", "error");
-    return;
+  if (stepNumber >= 3) {
+    const formCheck = validateCustomerForm(true);
+    if (!formCheck.isValid) {
+      if (!formCheck.nameRes.valid) {
+        showToast(`${formCheck.nameRes.message} ${formCheck.nameRes.expected || ''}`, "error");
+        document.getElementById("cust-name")?.focus();
+      } else if (!formCheck.emailRes.valid) {
+        showToast(`${formCheck.emailRes.message} ${formCheck.emailRes.expected || ''}`, "error");
+        document.getElementById("cust-email")?.focus();
+      } else if (!formCheck.phoneRes.valid) {
+        showToast(`${formCheck.phoneRes.message} ${formCheck.phoneRes.expected || ''}`, "error");
+        document.getElementById("cust-phone")?.focus();
+      }
+      return;
+    }
   }
 
   bookingState.currentStep = stepNumber;
@@ -703,4 +715,231 @@ export function showToast(message, type = "info") {
     toast.style.transition = "all 0.3s ease";
     setTimeout(() => toast.remove(), 300);
   }, 4000);
+}
+
+/**
+ * Validates Full Name: At least 2 characters, letters/spaces only.
+ */
+export function validateName(name) {
+  const trimmed = String(name || "").trim();
+  if (!trimmed) {
+    return {
+      valid: false,
+      message: "Full Name is required.",
+      expected: "e.g. Rahul Sharma (at least 2 letters)"
+    };
+  }
+  if (trimmed.length < 2) {
+    return {
+      valid: false,
+      message: "Name must be at least 2 characters long.",
+      expected: "e.g. Rahul Sharma"
+    };
+  }
+  if (!/^[a-zA-Z\s.']{2,50}$/.test(trimmed)) {
+    return {
+      valid: false,
+      message: "Name can only contain letters, spaces, dots, or hyphens.",
+      expected: "Letters only (e.g. Rahul Sharma)"
+    };
+  }
+  return { valid: true };
+}
+
+/**
+ * Validates Gmail ID: Must be a valid @gmail.com address.
+ */
+export function validateGmail(email) {
+  const trimmed = String(email || "").trim().toLowerCase();
+  if (!trimmed) {
+    return {
+      valid: false,
+      message: "Gmail address is required.",
+      expected: "Format: username@gmail.com"
+    };
+  }
+
+  // Detect common domain typos
+  if (/@(gamil|gmai|gmaill|gmial|gmal|gmaik|gmaul)\.com$/i.test(trimmed)) {
+    return {
+      valid: false,
+      message: "Typo detected in Gmail domain.",
+      expected: "Did you mean @gmail.com? (e.g. yourname@gmail.com)"
+    };
+  }
+
+  if (trimmed.endsWith("@gmail")) {
+    return {
+      valid: false,
+      message: "Incomplete Gmail address (missing .com).",
+      expected: "e.g. yourname@gmail.com"
+    };
+  }
+
+  if (!trimmed.endsWith("@gmail.com")) {
+    return {
+      valid: false,
+      message: "Please enter a valid Gmail (@gmail.com) address.",
+      expected: "Correct match: username@gmail.com"
+    };
+  }
+
+  const usernamePart = trimmed.slice(0, -10); // strip @gmail.com
+  if (!usernamePart || usernamePart.length < 3) {
+    return {
+      valid: false,
+      message: "Gmail username must be at least 3 characters.",
+      expected: "e.g. rahul@gmail.com"
+    };
+  }
+
+  // Standard Gmail username characters (alphanumeric, dots, pluses, underscores)
+  if (!/^[a-zA-Z0-9](\.?[a-zA-Z0-9_%+-])*$/.test(usernamePart)) {
+    return {
+      valid: false,
+      message: "Invalid characters in Gmail username.",
+      expected: "Use letters, numbers, or dots (e.g. yourname@gmail.com)"
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validates Indian Mobile Number: 10 digits starting with 6, 7, 8, or 9.
+ */
+export function validatePhone(phone) {
+  const raw = String(phone || "").trim();
+  const clean = raw.replace(/\D/g, "");
+
+  if (!raw) {
+    return {
+      valid: false,
+      message: "10-digit mobile number is required.",
+      expected: "10 digits (e.g. 9876543210)"
+    };
+  }
+
+  if (/[^\d\s\-+()]/.test(raw)) {
+    return {
+      valid: false,
+      message: "Mobile number contains invalid characters.",
+      expected: "Enter numbers only without letters (e.g. 9876543210)"
+    };
+  }
+
+  if (clean.length > 0 && !/^[6-9]/.test(clean)) {
+    return {
+      valid: false,
+      message: `Invalid starting digit '${clean[0]}'. Mobile numbers must start with 6, 7, 8, or 9.`,
+      expected: "Indian mobile numbers start with 6, 7, 8, or 9 (e.g. 9876543210)"
+    };
+  }
+
+  if (clean.length < 10) {
+    return {
+      valid: false,
+      message: `Incomplete mobile number (${clean.length}/10 digits entered).`,
+      expected: "Enter all 10 digits (e.g. 9876543210)"
+    };
+  }
+
+  if (clean.length > 10) {
+    return {
+      valid: false,
+      message: `Too many digits (${clean.length} digits entered).`,
+      expected: "Enter exactly 10 digits without +91 prefix (e.g. 9876543210)"
+    };
+  }
+
+  if (!/^[6-9]\d{9}$/.test(clean)) {
+    return {
+      valid: false,
+      message: "Invalid mobile number format.",
+      expected: "Format: 10 digits starting with 6-9 (e.g. 9876543210)"
+    };
+  }
+
+  return { valid: true, cleanPhone: clean };
+}
+
+/**
+ * Updates UI error state and expected match guidance for a specific input.
+ */
+export function updateFieldFeedback(inputId, feedbackId, result, showErrors = true) {
+  const input = document.getElementById(inputId);
+  const feedback = document.getElementById(feedbackId);
+  if (!input) return;
+
+  if (!showErrors && !input.value.trim()) {
+    input.classList.remove("is-invalid", "is-valid");
+    if (feedback) {
+      feedback.className = "field-feedback";
+      feedback.innerHTML = "";
+    }
+    return;
+  }
+
+  if (result.valid) {
+    input.classList.remove("is-invalid");
+    input.classList.add("is-valid");
+    if (feedback) {
+      feedback.className = "field-feedback active success";
+      feedback.innerHTML = `
+        <div class="field-feedback-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span>Valid format</span>
+        </div>
+      `;
+    }
+  } else {
+    input.classList.remove("is-valid");
+    input.classList.add("is-invalid");
+    if (feedback) {
+      feedback.className = "field-feedback active error";
+      feedback.innerHTML = `
+        <div class="field-feedback-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>${result.message}</span>
+        </div>
+        ${result.expected ? `<div class="field-expected-match"><strong>Correct Match:</strong> ${result.expected}</div>` : ""}
+      `;
+    }
+  }
+}
+
+/**
+ * Validates the entire customer form in Step 2.
+ */
+export function validateCustomerForm(showErrors = true) {
+  const nameInput = document.getElementById("cust-name");
+  const emailInput = document.getElementById("cust-email");
+  const phoneInput = document.getElementById("cust-phone");
+
+  const nameVal = nameInput ? nameInput.value : "";
+  const emailVal = emailInput ? emailInput.value : "";
+  const phoneVal = phoneInput ? phoneInput.value : "";
+
+  const nameRes = validateName(nameVal);
+  const emailRes = validateGmail(emailVal);
+  const phoneRes = validatePhone(phoneVal);
+
+  if (showErrors || nameVal.trim()) {
+    updateFieldFeedback("cust-name", "name-feedback", nameRes, showErrors);
+  }
+  if (showErrors || emailVal.trim()) {
+    updateFieldFeedback("cust-email", "email-feedback", emailRes, showErrors);
+  }
+  if (showErrors || phoneVal.trim()) {
+    updateFieldFeedback("cust-phone", "phone-feedback", phoneRes, showErrors);
+  }
+
+  const isValid = nameRes.valid && emailRes.valid && phoneRes.valid;
+  return {
+    isValid,
+    nameRes,
+    emailRes,
+    phoneRes,
+    cleanPhone: phoneRes.cleanPhone || phoneVal.replace(/\D/g, "")
+  };
 }
